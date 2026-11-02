@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{padding-top:env(safe-area-inset-top,0px)}</style>
+<title>Jiffy Lube Supply Order</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: red masthead band, store strip, then catalog list + sticky order panel (desktop) / bottom total bar + order sheet (phone).
+   Same brand system as the CISA job application page. */
+:root {
+  --brand: #C8102E;        /* Jiffy Lube red: fills, buttons */
+  --brand-ink: #9E0B23;    /* red used as text */
+  --brand-wash: #FBEFF2;   /* rows in the order */
+  --ink: #1D2125;
+  --ink-soft: #4A5058;
+  --line: #D6D9DE;
+  --mist: #EEF0F2;
+  --paper: #FFFFFF;
+  --bg: #F6F7F8;
+  --amber: #FFC72C;
+  --amber-wash: #FFF4D1;
+  --amber-ink: #7A5200;
+  --ok: #1E7B4A;
+  --ok-wash: #E7F4EC;
+  --band: #C8102E;
+  --shadow: 0 1px 2px rgba(29,33,37,.06), 0 6px 20px rgba(29,33,37,.08);
+  --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 12px;
+  --r-sm: 8px;
+  --toolbar-h: 112px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand: #C8102E; --brand-ink: #FF8C9C; --brand-wash: #33191E;
+    --ink: #ECEEF0; --ink-soft: #A9B0B8; --line: #31363C; --mist: #262A2F; --paper: #1B1E22; --bg: #121417;
+    --amber-wash: #3A2F12; --amber-ink: #FFD467; --ok: #67CB92; --ok-wash: #163222; --band: #A30D26;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --brand: #C8102E; --brand-ink: #FF8C9C; --brand-wash: #33191E;
+  --ink: #ECEEF0; --ink-soft: #A9B0B8; --line: #31363C; --mist: #262A2F; --paper: #1B1E22; --bg: #121417;
+  --amber-wash: #3A2F12; --amber-ink: #FFD467; --ok: #67CB92; --ok-wash: #163222; --band: #A30D26;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.45 var(--body); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+img { max-width: 100%; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1200px; margin: 0 auto; }
+
+/* Masthead */
+.masthead { background: var(--band); color: #fff; }
+.masthead .wrap { padding-block: 18px 20px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px 24px; }
+.brand { margin: 0 0 4px; font: 700 14px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.masthead h1 { margin: 0; font: 800 clamp(32px, 6vw, 46px)/.95 var(--display); letter-spacing: .01em; text-wrap: balance; }
+.masthead .from { margin: 0; font-size: 15px; opacity: .92; max-width: 34ch; }
+.masthead .from b { font-weight: 600; }
+.mode { background: var(--ink); color: var(--paper); font-size: 14px; }
+.mode .wrap { padding-block: 8px; }
+.mode b { color: var(--amber); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin-right: 6px; }
+
+/* Store */
+.storezone .wrap { padding-block: 18px 6px; }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); }
+.picker { padding: 16px; }
+.picker h2, .sec-title { margin: 0; font: 800 24px/1.1 var(--display); text-wrap: balance; }
+.hint { color: var(--ink-soft); font-size: 15px; margin: 2px 0 12px; }
+.search { width: 100%; padding: 11px 14px 11px 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='8.5' cy='8.5' r='5.5' fill='none' stroke='%23858C94' stroke-width='2'/%3E%3Cpath d='M13 13l4.5 4.5' stroke='%23858C94' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 13px 50%/18px; font-size: 16px; }
+.search:focus { border-color: var(--ink-soft); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 55%, transparent); }
+.store-list { margin-top: 10px; max-height: 340px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px; }
+.city { position: sticky; top: 0; background: var(--mist); color: var(--ink-soft); font: 700 13px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 8px 12px; }
+.store-opt { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--paper); border: 0; border-bottom: 1px solid var(--line); padding: 10px 12px; }
+.store-opt:last-child { border-bottom: 0; }
+.store-opt:hover { background: var(--brand-wash); }
+.sn { font: 700 17px/1 var(--display); background: var(--mist); border-radius: 6px; padding: 7px 8px; min-width: 62px; text-align: center; letter-spacing: .02em; }
+.store-opt small, .chosen small { display: block; color: var(--ink-soft); font-size: 14px; }
+.daychip { font: 700 12px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 999px; padding: 5px 9px; white-space: nowrap; }
+
+.chosen { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr); gap: 0; overflow: hidden; }
+.chosen > div { padding: 14px 16px; min-width: 0; }
+.chosen .who { display: flex; gap: 12px; align-items: center; }
+.chosen .who .sn { background: var(--brand); color: #fff; }
+.chosen .when { border-left: 1px solid var(--line); }
+.label { display: block; font: 700 12px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 3px; }
+.big { font: 700 22px/1.1 var(--display); }
+.linkbtn { background: none; border: 0; padding: 4px 0; color: var(--brand-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.closes { display: inline-block; margin-top: 6px; font-size: 14px; font-weight: 600; background: var(--mist); border-radius: 999px; padding: 3px 10px; }
+.closes.soon { background: var(--amber-wash); color: var(--amber-ink); }
+.missed { margin: 6px 0 0; font-size: 14px; color: var(--ink-soft); }
+
+/* Main layout */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding-block: 12px 120px; }
+@media (min-width: 980px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 370px; padding-bottom: 48px; align-items: start; }
+}
+
+/* Catalog toolbar */
+.toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); padding: 10px 0 8px; display: grid; gap: 10px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 7px 12px; font: 600 14px/1 var(--body); white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+.chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip .ct { font: 700 12px/1 var(--display); background: var(--brand); color: #fff; border-radius: 999px; padding: 3px 6px; }
+
+/* Catalog */
+.cat { scroll-margin-top: calc(env(safe-area-inset-top, 0px) + var(--toolbar-h)); margin-top: 18px; }
+.cat-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 8px; }
+.cat-head .sec-title { font-size: 26px; }
+.cat-head .count { color: var(--ink-soft); font-size: 14px; white-space: nowrap; }
+.items { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.grp { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--mist); font: 700 14px/1.2 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--line); }
+.items > .grp:not(:first-child) { border-top: 1px solid var(--line); }
+.sw { width: 14px; height: 14px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); flex: none; }
+
+.item { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-areas: "thumb info qty" "thumb price qty"; column-gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.items > .item:last-child { border-bottom: 0; }
+.item.in { background: var(--brand-wash); }
+.compact .item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "info qty" "price qty"; padding-block: 8px; }
+.thumb { grid-area: thumb; width: 52px; height: 52px; border-radius: var(--r-sm); overflow: hidden; background: var(--mist); border: 0; padding: 0; position: relative; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+button.thumb { cursor: zoom-in; }
+button.thumb::after { content: ""; position: absolute; right: 3px; bottom: 3px; width: 16px; height: 16px; border-radius: 4px; background: rgba(29,33,37,.72) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 6V3h3M13 10v3h-3M10 3h3v3M6 13H3v-3' fill='none' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E") center/12px no-repeat; }
+.thumb.ph { display: grid; place-items: center; text-align: center; padding: 4px; font: 700 11px/1.05 var(--display); letter-spacing: .03em; color: var(--ink-soft); overflow-wrap: anywhere; }
+.info { grid-area: info; min-width: 0; }
+.name { font-weight: 600; line-height: 1.25; }
+.meta { font-size: 14px; color: var(--ink-soft); line-height: 1.3; margin-top: 2px; }
+.part { font: 600 13px/1 var(--display); letter-spacing: .05em; color: var(--ink); }
+.meta .note { display: block; }
+.price { grid-area: price; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.price small { font-weight: 500; color: var(--ink-soft); }
+@media (min-width: 640px) {
+  .item { grid-template-columns: 72px minmax(0, 1fr) 104px auto; grid-template-areas: "thumb info price qty"; }
+  .compact .item { grid-template-columns: minmax(0, 1fr) 104px auto; grid-template-areas: "info price qty"; }
+  .thumb { width: 72px; height: 72px; }
+  .qty button { width: 40px; }
+  .qty input { width: 46px; }
+  .item { column-gap: 12px; }
+  .price { text-align: right; margin-top: 0; }
+  .price small { display: block; }
+}
+
+.qty { grid-area: qty; display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--paper); }
+.qty button { width: 34px; min-height: 40px; border: 0; background: var(--mist); font: 600 21px/1 var(--body); display: grid; place-items: center; }
+.qty button:hover { background: color-mix(in srgb, var(--ink) 12%, var(--mist)); }
+.qty input { width: 36px; border: 0; text-align: center; font: 700 17px/1 var(--body); background: transparent; font-variant-numeric: tabular-nums; }
+.qty input:focus { outline: none; background: color-mix(in srgb, var(--amber) 30%, transparent); }
+.item.in .qty { border-color: var(--brand); }
+.item.in .qty .plus { background: var(--brand); color: #fff; }
+
+.empty-search { padding: 24px 16px; text-align: center; color: var(--ink-soft); }
+.loading { padding: 40px 16px; text-align: center; color: var(--ink-soft); }
+
+/* Order panel */
+.summary { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
+@media (min-width: 980px) {
+  .summary { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px - env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; margin-top: 10px; }
+  .sum-scroll { overflow-y: auto; }
+  .sum-close, .bar { display: none !important; }
+}
+.sum-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+.sum-head h2 { margin: 0; font: 800 24px/1 var(--display); }
+.sum-close { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 14px; font-weight: 600; }
+.sum-scroll { padding: 14px 16px 16px; display: grid; gap: 14px; align-content: start; }
+
+.budget { border-radius: 10px; background: var(--mist); padding: 12px; display: grid; gap: 8px; }
+.budget.over { background: var(--amber-wash); }
+.b-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.b-top b { font: 700 20px/1 var(--display); font-variant-numeric: tabular-nums; }
+.meter { position: relative; height: 12px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, var(--paper)); overflow: hidden; display: flex; }
+.meter i { display: block; height: 100%; }
+.meter .m-spent { background: var(--ink-soft); }
+.meter .m-this { background: var(--brand); }
+.meter .m-mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); }
+.budget.over .meter .m-this { background: repeating-linear-gradient(135deg, var(--brand) 0 6px, #E2A400 6px 12px); }
+.b-figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; }
+.b-figs div { min-width: 0; }
+.b-figs dt { font-size: 12px; color: var(--ink-soft); }
+.b-figs dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.b-note { margin: 0; font-size: 14px; color: var(--amber-ink); font-weight: 600; }
+.b-muted { margin: 0; font-size: 14px; color: var(--ink-soft); }
+.b-orders { margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink-soft); border-top: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent); padding-top: 6px; }
+.b-orders li { display: flex; justify-content: space-between; gap: 8px; }
+
+.lines { list-style: none; margin: 0; padding: 0; display: grid; }
+.line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.line:first-child { padding-top: 0; }
+.line .ln { font-weight: 600; line-height: 1.25; }
+.line .lt { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.line .lm { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.line .mini { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.line .mini button { width: 30px; height: 28px; border: 0; background: var(--mist); font-weight: 700; }
+.line .mini span { min-width: 30px; display: grid; place-items: center; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sum-empty { margin: 0; color: var(--ink-soft); font-size: 15px; background: var(--mist); border-radius: 10px; padding: 14px; }
+
+.total-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-top: 2px solid var(--ink); padding-top: 10px; }
+.total-row span { font: 700 15px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; }
+.total-row strong { font: 800 30px/1 var(--display); font-variant-numeric: tabular-nums; }
+
+.field { display: grid; gap: 5px; font-weight: 600; font-size: 15px; }
+.field .opt { font-weight: 400; color: var(--ink-soft); }
+.field input, .field textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); font-weight: 400; font-size: 16px; }
+.field textarea { resize: vertical; min-height: 64px; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--ink-soft); box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 55%, transparent); }
+.err { margin: 0; color: var(--brand-ink); font-weight: 600; font-size: 15px; }
+.primary { width: 100%; border: 0; border-radius: 12px; background: var(--brand); color: #fff; padding: 15px 16px; font: 700 20px/1.1 var(--display); letter-spacing: .02em; display: inline-flex; justify-content: center; align-items: center; gap: 10px; }
+.primary:hover { background: #A90D27; }
+.primary:disabled { opacity: .55; cursor: default; }
+.primary.amber { background: var(--amber); color: #1D2125; }
+.fine { margin: -4px 0 0; font-size: 13px; color: var(--ink-soft); text-align: center; }
+.spin { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.done { display: grid; gap: 10px; align-content: start; }
+.done .stamp { display: inline-block; justify-self: start; font: 700 13px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; border-radius: 999px; padding: 6px 10px; background: var(--ok-wash); color: var(--ok); }
+.done .stamp.wait { background: var(--amber-wash); color: var(--amber-ink); }
+.done h3 { margin: 0; font: 800 30px/1 var(--display); }
+.done p { margin: 0; }
+.done dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; font-size: 15px; }
+.done dt { color: var(--ink-soft); }
+.done dd { margin: 0; font-weight: 600; }
+.ghost { width: 100%; border: 2px solid var(--ink); background: transparent; border-radius: 12px; padding: 12px; font: 700 18px/1 var(--display); }
+
+/* Phone: bottom bar + order sheet */
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--paper); border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(0,0,0,.08);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: flex; align-items: center; gap: 12px; }
+.bar-figs { flex: 1; min-width: 0; display: grid; line-height: 1.15; }
+.bar-figs strong { font: 800 24px/1 var(--display); font-variant-numeric: tabular-nums; }
+.bar-figs span { font-size: 13px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-figs span.over { color: var(--amber-ink); font-weight: 700; }
+.bar .primary { width: auto; padding: 13px 18px; font-size: 18px; }
+@media (max-width: 979px) {
+  .summary { display: none; }
+  body.sheet-open { overflow: hidden; }
+  body.sheet-open .summary { display: flex; flex-direction: column; position: fixed; inset: 0; z-index: 40; border-radius: 0; border: 0;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body.sheet-open .sum-head, body.sheet-open .sum-scroll { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  body.sheet-open .sum-scroll { overflow-y: auto; flex: 1; }
+}
+
+/* Photo viewer */
+dialog { border: 0; border-radius: var(--r); padding: 0; background: var(--paper); color: var(--ink); width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 32px); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+dialog::backdrop { background: rgba(10,12,14,.72); }
+.dlg { display: grid; grid-template-rows: minmax(0, 1fr) auto; max-height: calc(100vh - 32px); }
+.dlg-img { background: #0E1012; display: grid; place-items: center; min-height: 0; }
+.dlg-img img { max-height: min(62vh, 640px); width: auto; object-fit: contain; display: block; }
+.dlg-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 16px; }
+.dlg-foot .name { font-size: 18px; }
+.dlg-x { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: 22px; line-height: 1; }
+
+footer { text-align: center; color: var(--ink-soft); font-size: 13px; padding-block: 0 140px; }
+@media (min-width: 980px) { footer { padding-block: 0 32px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; animation: none !important; } }
+@media (max-width: 700px) {
+  .daychip .dl { display: none; }
+  .store-opt { gap: 10px; }
+  .chosen { grid-template-columns: minmax(0, 1fr); }
+  .chosen .when { border-left: 0; border-top: 1px solid var(--line); }
+}
+</style>
+
+<header class="masthead">
+  <div class="wrap gutter">
+    <div>
+      <p class="brand">Jiffy Lube · Carolinas</p>
+      <h1>Supply Order</h1>
+    </div>
+    <p class="from">Shop and store supplies from <b>Mighty Auto Parts</b>, delivered on your route day.</p>
+  </div>
+</header>
+<div class="mode" id="modeBar" hidden><div class="wrap gutter" id="modeText"></div></div>
+
+<section class="storezone" aria-label="Store">
+  <div class="wrap gutter">
+    <div class="panel picker" id="picker">
+      <h2>Which store is ordering?</h2>
+      <p class="hint">Search by store number, city or street.</p>
+      <input type="search" id="storeSearch" class="search" placeholder="e.g. 3212, Rock Hill, Devine" autocomplete="off" aria-label="Search stores">
+      <div class="store-list" id="storeList" role="list"></div>
+    </div>
+    <div class="panel chosen" id="chosen" hidden>
+      <div class="who">
+        <span class="sn" id="chosenNum"></span>
+        <div style="min-width:0">
+          <span id="chosenAddr"></span><small id="chosenCity"></small>
+          <button type="button" class="linkbtn" id="changeStore">Change store</button>
+        </div>
+      </div>
+      <div class="when">
+        <span class="label">This order arrives</span>
+        <div class="big" id="deliveryDate"></div>
+        <span class="closes" id="closes"></span>
+        <p class="missed" id="missed" hidden></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap gutter">
+  <div class="layout">
+    <main id="catalogCol" aria-label="Items">
+      <div class="toolbar" id="toolbar">
+        <input type="search" id="itemSearch" class="search" placeholder="Search items or part numbers" autocomplete="off" aria-label="Search items">
+        <nav class="chips" id="chips" aria-label="Categories"></nav>
+      </div>
+      <div id="catalog"><p class="loading">Loading the item list…</p></div>
+    </main>
+
+    <aside class="summary" id="summary" aria-label="Your order">
+      <div class="sum-head">
+        <h2>Your order</h2>
+        <button type="button" class="sum-close" id="closeSheet">Keep shopping</button>
+      </div>
+      <div class="sum-scroll" id="sumScroll">
+        <div id="orderView">
+          <div style="display:grid;gap:14px">
+            <div class="budget" id="budget"></div>
+            <ol class="lines" id="lines"></ol>
+            <div class="total-row"><span>Order total</span><strong id="total" aria-live="polite">$0.00</strong></div>
+            <label class="field" for="notes">Special requests or items not on the list <span class="opt">(optional)</span>
+              <textarea id="notes" rows="2" maxlength="1500" placeholder="e.g. Need a mop handle, or bring 2 extra cases of brake clean if you have them"></textarea>
+            </label>
+            <label class="field" for="orderedBy">Your name
+              <input type="text" id="orderedBy" autocomplete="name" maxlength="80">
+            </label>
+            <label class="field" for="pin" id="pinWrap" hidden>Store order PIN
+              <input type="text" id="pin" inputmode="numeric" autocomplete="off" maxlength="12">
+            </label>
+            <input type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+            <p class="err" id="formError" role="alert" hidden></p>
+            <button type="button" class="primary" id="submitBtn">Send order to Mighty</button>
+            <p class="fine" id="fine">Your store and your DM get a copy of the order email.</p>
+          </div>
+        </div>
+        <div id="doneView" class="done" hidden></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<footer class="gutter">CISA Lubes, independent Jiffy Lube franchisee · Prices from Mighty Auto Parts</footer>
+
+<div class="bar" id="bar">
+  <div class="bar-figs">
+    <strong id="barTotal">$0.00</strong>
+    <span id="barSub">No items yet</span>
+  </div>
+  <button type="button" class="primary" id="openSheet">Review order</button>
+</div>
+
+<dialog id="photoDlg" aria-label="Item photo">
+  <div class="dlg">
+    <div class="dlg-img"><img id="dlgImg" alt=""></div>
+    <div class="dlg-foot">
+      <div style="min-width:0"><div class="name" id="dlgName"></div><div class="meta" id="dlgMeta"></div></div>
+      <div class="qty" id="dlgQty"></div>
+    </div>
+  </div>
+  <button type="button" class="dlg-x" id="dlgClose" aria-label="Close photo">×</button>
+</dialog>
+
+<script type="application/json" id="demoData">{"ok":true,"settings":{"period":"Month","cutoffDays":2,"cutoffTime":"23:59","holidays":["2026-11-26","2026-12-25","2027-01-01"],"testMode":false},"stores":[{"n":"41","street":"216 Eastway Dr","city":"Charlotte","st":"NC","day":"Wed","budget":350,"dm":"Pablo Martinez","pin":false},{"n":"2632","street":"7024 E W.T. Harris Blvd","city":"Charlotte","st":"NC","day":"Wed","budget":350,"dm":"Robert Gayle","pin":false},{"n":"2973","street":"9710 Monroe Rd","city":"Charlotte","st":"NC","day":"Wed","budget":500,"dm":"Pablo Martinez","pin":false},{"n":"3855","street":"4565 South Blvd","city":"Charlotte","st":"NC","day":"Thu","budget":700,"dm":"Robert Gayle","pin":false},{"n":"4056","street":"8315 W W.T. Harris Blvd","city":"Charlotte","st":"NC","day":"Thu","budget":450,"dm":"Pablo Martinez","pin":false},{"n":"3148","street":"20116 W Catawba Ave","city":"Cornelius","st":"NC","day":"Mon","budget":500,"dm":"Pablo Martinez","pin":false},{"n":"3150","street":"2109 Union Rd","city":"Gastonia","st":"NC","day":"Thu","budget":350,"dm":"Pablo Martinez","pin":false},{"n":"1214","street":"1201 Matthews Mint Hill Rd","city":"Matthews","st":"NC","day":"Wed","budget":500,"dm":"Luis Castillo","pin":false},{"n":"3212","street":"1125 Yadkinville Rd","city":"Mocksville","st":"NC","day":"Mon","budget":350,"dm":"Pablo Martinez","pin":false},{"n":"2484","street":"2105 W Roosevelt Blvd","city":"Monroe","st":"NC","day":"Wed","budget":400,"dm":"Luis Castillo","pin":false},{"n":"3149","street":"300 W Plaza Dr","city":"Mooresville","st":"NC","day":"Mon","budget":350,"dm":"Pablo Martinez","pin":false},{"n":"2485","street":"207 N Polk St","city":"Pineville","st":"NC","day":"Thu","budget":400,"dm":"Robert Gayle","pin":false},{"n":"3850","street":"721 Jake Alexander Blvd","city":"Salisbury","st":"NC","day":"Mon","budget":350,"dm":"Pablo Martinez","pin":false},{"n":"104","street":"1139 Knox Abbott Dr","city":"Cayce","st":"SC","day":"Tue","budget":400,"dm":"Marcos Flores","pin":false},{"n":"4121","street":"115 Evergreen Rd","city":"Clover","st":"SC","day":"Thu","budget":350,"dm":"Luis Castillo","pin":false},{"n":"103","street":"4414 Devine St","city":"Columbia","st":"SC","day":"Tue","budget":400,"dm":"Marcos Flores","pin":false},{"n":"3377","street":"4423 Hard Scrabble Rd","city":"Columbia","st":"SC","day":"Tue","budget":350,"dm":"Marcos Flores","pin":false},{"n":"4080","street":"8170 Charlotte Hwy","city":"Fort Mill","st":"SC","day":"Thu","budget":350,"dm":"Luis Castillo","pin":false},{"n":"3216","street":"1069 Lake Murray Blvd","city":"Irmo","st":"SC","day":"Tue","budget":400,"dm":"Marcos Flores","pin":false},{"n":"3858","street":"1782 S Lake Dr","city":"Lexington","st":"SC","day":"Tue","budget":600,"dm":"Marcos Flores","pin":false},{"n":"3894","street":"742 Cherry Rd","city":"Rock Hill","st":"SC","day":"Thu","budget":350,"dm":"Luis Castillo","pin":false},{"n":"2196","street":"1920 Sunset Blvd","city":"West Columbia","st":"SC","day":"Tue","budget":400,"dm":"Marcos Flores","pin":false}],"catalog":[{"p":"KCUP","cat":"Coffee Station","grp":"","d":"Coffee K-Cups","u":"Box of 100","price":60.64,"mq":1,"img":"","link":"","note":""},{"p":"SUGAR","cat":"Coffee Station","grp":"","d":"Sugar","u":"Box","price":17.33,"mq":1,"img":"","link":"","note":""},{"p":"CREAMER","cat":"Coffee Station","grp":"","d":"Creamer","u":"Box","price":17.33,"mq":1,"img":"","link":"","note":""},{"p":"STIRRER","cat":"Coffee Station","grp":"","d":"Coffee stirrers","u":"Box","price":4.26,"mq":1,"img":"","link":"","note":""},{"p":"LGDCC8J8","cat":"Coffee Station","grp":"","d":"Foam cups, 8 oz (Dart)","u":"Box","price":70.32,"mq":1,"img":"","link":"","note":""},{"p":"PAPER","cat":"Office & Paperwork","grp":"","d":"Copy paper","u":"Ream (500 sheets)","price":5.53,"mq":1,"img":"PAPER.jpg","link":"","note":""},{"p":"PEN","cat":"Office & Paperwork","grp":"","d":"Ink pens","u":"24-pack","price":4.0,"mq":1,"img":"PEN.jpg","link":"","note":""},{"p":"SHARPIE","cat":"Office & Paperwork","grp":"","d":"Sharpie permanent markers","u":"12-pack","price":13.32,"mq":1,"img":"SHARPIE.jpg","link":"","note":""},{"p":"HL-2","cat":"Office & Paperwork","grp":"","d":"Highlighters","u":"2-pack","price":1.86,"mq":1,"img":"HL-2.jpg","link":"","note":""},{"p":"CLIP","cat":"Office & Paperwork","grp":"","d":"Clipboard","u":"Each","price":2.99,"mq":1,"img":"","link":"","note":""},{"p":"JL100L","cat":"Office & Paperwork","grp":"","d":"Jiffy Lube invoices","u":"Each","price":74.81,"mq":1,"img":"","link":"","note":""},{"p":"ROC","cat":"Office & Paperwork","grp":"","d":"ROC cards","u":"Pack","price":18.62,"mq":1,"img":"","link":"","note":""},{"p":"STICKER","cat":"Office & Paperwork","grp":"","d":"Static mileage stickers","u":"2-roll pack","price":83.73,"mq":1,"img":"STICKER.jpg","link":"","note":""},{"p":"SRIBBON","cat":"Office & Paperwork","grp":"","d":"Sticker printer ribbon","u":"Each","price":13.33,"mq":1,"img":"SRIBBON.jpg","link":"","note":""},{"p":"TONER","cat":"Office & Paperwork","grp":"","d":"Printer toner","u":"Each","price":37.2,"mq":1,"img":"","link":"","note":""},{"p":"ZTONER","cat":"Office & Paperwork","grp":"","d":"Printer toner (Z), new stores only","u":"Each","price":61.26,"mq":1,"img":"","link":"","note":""},{"p":"HP26A","cat":"Office & Paperwork","grp":"","d":"HP 26A printer cartridge","u":"Each","price":65.0,"mq":1,"img":"","link":"","note":""},{"p":"BROTHERS","cat":"Office & Paperwork","grp":"","d":"Brother printer cartridge","u":"Each","price":41.96,"mq":1,"img":"","link":"","note":""},{"p":"DAWN","cat":"Cleaning & Restroom","grp":"","d":"Dish soap, 102 oz","u":"Each","price":11.94,"mq":1,"img":"DAWN.jpg","link":"","note":""},{"p":"10926415","cat":"Cleaning & Restroom","grp":"","d":"Scrubbing Bubbles bathroom cleaner","u":"Each","price":7.24,"mq":1,"img":"10926415.jpg","link":"","note":""},{"p":"MN103","cat":"Cleaning & Restroom","grp":"","d":"Glass cleaner, 18 oz","u":"Each","price":3.35,"mq":1,"img":"","link":"","note":""},{"p":"41300ZZ","cat":"Cleaning & Restroom","grp":"","d":"Center-pull paper towels, 2-ply","u":"Box","price":46.83,"mq":1,"img":"41300ZZ.jpg","link":"","note":""},{"p":"10783812","cat":"Cleaning & Restroom","grp":"","d":"Center-pull towel dispenser","u":"Each","price":37.5,"mq":1,"img":"","link":"","note":""},{"p":"6283444","cat":"Cleaning & Restroom","grp":"","d":"Toilet tissue, jumbo roll","u":"Box of 12","price":38.05,"mq":1,"img":"6283444.jpg","link":"","note":""},{"p":"HAB1L","cat":"Cleaning & Restroom","grp":"","d":"Hand soap refill, 1 L (Estesol)","u":"Each","price":7.82,"mq":1,"img":"HAB1L.jpg","link":"","note":""},{"p":"91128","cat":"Cleaning & Restroom","grp":"","d":"Foam soap dispenser, 1 L (black)","u":"Each","price":2.0,"mq":1,"img":"","link":"","note":""},{"p":"11052541","cat":"Cleaning & Restroom","grp":"","d":"Mop head, 16 oz","u":"Each","price":11.45,"mq":1,"img":"11052541.jpg","link":"","note":""},{"p":"DL3401-35","cat":"Cleaning & Restroom","grp":"","d":"Powdered floor cleaner (Mighty)","u":"Each","price":58.59,"mq":1,"img":"","link":"","note":""},{"p":"6112-77ZZ","cat":"Cleaning & Restroom","grp":"","d":"Wet floor sign","u":"Each","price":37.09,"mq":1,"img":"","link":"","note":""},{"p":"GCPCR-73","cat":"Cleaning & Restroom","grp":"","d":"Trash bags, 55 gal black","u":"Box of 100","price":45.6,"mq":1,"img":"GCPCR-73.jpg","link":"","note":""},{"p":"10099671","cat":"Cleaning & Restroom","grp":"","d":"Trash bags, small (tall kitchen)","u":"Box","price":30.63,"mq":1,"img":"10099671.jpg","link":"","note":""},{"p":"DL6143","cat":"Cleaning & Restroom","grp":"","d":"Microfiber towel","u":"Each","price":1.13,"mq":1,"img":"DL6143.jpg","link":"","note":""},{"p":"DL6120","cat":"Cleaning & Restroom","grp":"","d":"Spray bottle, white","u":"Each","price":0.94,"mq":1,"img":"","link":"","note":""},{"p":"DL6121","cat":"Cleaning & Restroom","grp":"","d":"Spray bottle trigger, chemical resistant","u":"Each","price":1.45,"mq":1,"img":"","link":"","note":""},{"p":"M5002PE2180A","cat":"Customer Car Protection","grp":"","d":"Paper floor mats","u":"Box","price":69.69,"mq":1,"img":"M5002PE2180A.jpg","link":"","note":""},{"p":"P9943-20","cat":"Customer Car Protection","grp":"","d":"Seat covers, heavy duty","u":"Box","price":70.65,"mq":1,"img":"P9943-20.jpg","link":"","note":""},{"p":"P9943-33","cat":"Customer Car Protection","grp":"","d":"Steering wheel covers","u":"Box of 500","price":46.71,"mq":1,"img":"P9943-33.jpg","link":"","note":""},{"p":"5435-JIFFY","cat":"Customer Car Protection","grp":"","d":"Jiffy Lube fender covers","u":"Each","price":15.1,"mq":1,"img":"","link":"","note":""},{"p":"BK103","cat":"Shop Chemicals & Absorbents","grp":"","d":"Brake parts cleaner","u":"Case of 12 cans","price":33.0,"mq":12,"img":"","link":"","note":""},{"p":"MN149","cat":"Shop Chemicals & Absorbents","grp":"","d":"Bench Pro degreaser, spray quart","u":"Each","price":8.59,"mq":1,"img":"MN149.jpg","link":"","note":""},{"p":"DL3000-5","cat":"Shop Chemicals & Absorbents","grp":"","d":"Orange degreaser, 5 gal","u":"Pail","price":53.87,"mq":1,"img":"DL3000-5.jpg","link":"","note":""},{"p":"99027563","cat":"Shop Chemicals & Absorbents","grp":"","d":"Kresto Cherry hand cleaner, 2 L","u":"Each","price":28.19,"mq":1,"img":"99027563.jpg","link":"","note":""},{"p":"MN114","cat":"Shop Chemicals & Absorbents","grp":"","d":"Washer fluid concentrate, 1 gal","u":"Each","price":15.82,"mq":1,"img":"","link":"","note":""},{"p":"MN105","cat":"Shop Chemicals & Absorbents","grp":"","d":"Penetrating oil, 11 oz","u":"Each","price":4.08,"mq":1,"img":"","link":"","note":""},{"p":"MN106","cat":"Shop Chemicals & Absorbents","grp":"","d":"Silicone spray, 10 oz","u":"Each","price":3.25,"mq":1,"img":"","link":"","note":""},{"p":"4604","cat":"Shop Chemicals & Absorbents","grp":"","d":"White grease, 11 oz","u":"Each","price":4.6,"mq":1,"img":"","link":"","note":""},{"p":"MPG114HT","cat":"Shop Chemicals & Absorbents","grp":"","d":"High-temp red grease","u":"Each","price":4.48,"mq":1,"img":"","link":"","note":""},{"p":"MN120","cat":"Shop Chemicals & Absorbents","grp":"","d":"Hi-temp red RTV silicone","u":"Each","price":16.74,"mq":1,"img":"","link":"","note":""},{"p":"MN117","cat":"Shop Chemicals & Absorbents","grp":"","d":"Clear RTV sealant","u":"Each","price":16.74,"mq":1,"img":"","link":"","note":""},{"p":"MN118","cat":"Shop Chemicals & Absorbents","grp":"","d":"Black RTV gasket maker","u":"Each","price":16.74,"mq":1,"img":"","link":"","note":""},{"p":"99070","cat":"Shop Chemicals & Absorbents","grp":"","d":"The Right Stuff gasket maker","u":"Each","price":24.07,"mq":1,"img":"","link":"","note":""},{"p":"25201","cat":"Shop Chemicals & Absorbents","grp":"","d":"Pig Mat absorbent roll, light weight","u":"Roll","price":21.08,"mq":1,"img":"25201.jpg","link":"","note":""},{"p":"XB25D","cat":"Shop Chemicals & Absorbents","grp":"","d":"SpillKing absorbent","u":"Bag","price":14.83,"mq":1,"img":"","link":"","note":""},{"p":"GL-N145FM","cat":"Gloves & Safety","grp":"","d":"Nitrile gloves, black 5 mil, Medium","u":"Box of 100","price":6.1,"mq":1,"img":"GL-N145FM.jpg","link":"","note":""},{"p":"GL-N145FL","cat":"Gloves & Safety","grp":"","d":"Nitrile gloves, black 5 mil, Large","u":"Box of 100","price":6.1,"mq":1,"img":"GL-N145FL.jpg","link":"","note":""},{"p":"GL-N145FXL","cat":"Gloves & Safety","grp":"","d":"Nitrile gloves, black 5 mil, XL","u":"Box of 100","price":6.18,"mq":1,"img":"GL-N145FXL.jpg","link":"","note":""},{"p":"GL-N145FXXL","cat":"Gloves & Safety","grp":"","d":"Nitrile gloves, black 5 mil, XXL","u":"Box of 100","price":6.57,"mq":1,"img":"GL-N145FXXL.jpg","link":"","note":""},{"p":"751FTCL-DZ","cat":"Gloves & Safety","grp":"","d":"Safety glasses, clear","u":"Each","price":1.26,"mq":1,"img":"","link":"","note":""},{"p":"LIS21260","cat":"Gloves & Safety","grp":"","d":"Kevlar burn sleeve","u":"Each","price":37.24,"mq":1,"img":"LIS21260.jpg","link":"","note":""},{"p":"31917","cat":"Tools & Testers","grp":"","d":"Speed handle, 8/10 mm","u":"Each","price":35.82,"mq":1,"img":"","link":"","note":""},{"p":"S31920","cat":"Tools & Testers","grp":"","d":"Speed handle, T25 Torx","u":"Each","price":64.31,"mq":1,"img":"","link":"","note":""},{"p":"2538","cat":"Tools & Testers","grp":"","d":"Oil filter band wrench, small (57-73 mm)","u":"Each","price":16.12,"mq":1,"img":"2538.jpg","link":"","note":""},{"p":"2540","cat":"Tools & Testers","grp":"","d":"Oil filter band wrench, medium (65-83 mm)","u":"Each","price":16.12,"mq":1,"img":"2540.jpg","link":"","note":""},{"p":"2545","cat":"Tools & Testers","grp":"","d":"Oil filter band wrench, large (75-95 mm)","u":"Each","price":16.12,"mq":1,"img":"2545.jpg","link":"","note":""},{"p":"2534","cat":"Tools & Testers","grp":"","d":"Oil filter pliers","u":"Each","price":16.92,"mq":1,"img":"2534.jpg","link":"","note":""},{"p":"3865","cat":"Tools & Testers","grp":"","d":"Oil filter wrench set, 5 pc","u":"Set","price":60.49,"mq":1,"img":"","link":"","note":""},{"p":"1726","cat":"Tools & Testers","grp":"","d":"Toyota/Lexus oil filter housing wrench","u":"Each","price":39.05,"mq":1,"img":"1726.jpg","link":"","note":""},{"p":"2477","cat":"Tools & Testers","grp":"","d":"Toyota 4-cyl oil filter cup","u":"Each","price":26.6,"mq":1,"img":"","link":"","note":""},{"p":"2495K","cat":"Tools & Testers","grp":"","d":"Dog bone wrench, 8-in-1","u":"Each","price":48.39,"mq":1,"img":"2495K.jpg","link":"","note":""},{"p":"1444","cat":"Tools & Testers","grp":"","d":"Torque-limiting ratchet wrench","u":"Each","price":64.12,"mq":1,"img":"","link":"","note":""},{"p":"8910ZZ","cat":"Tools & Testers","grp":"","d":"Torque wrench, 1/2 in drive","u":"Each","price":130.09,"mq":1,"img":"","link":"","note":""},{"p":"50092A","cat":"Tools & Testers","grp":"","d":"Torque extension, 1/2 in drive (yellow)","u":"Each","price":11.9,"mq":1,"img":"50092A.jpg","link":"","note":""},{"p":"AMF150D","cat":"Tools & Testers","grp":"","d":"Tire inflator gauge, 10-90 psi","u":"Each","price":48.15,"mq":1,"img":"","link":"","note":""},{"p":"17-607C","cat":"Tools & Testers","grp":"","d":"Tread depth gauge","u":"Each","price":1.02,"mq":1,"img":"","link":"","note":""},{"p":"KTI70120","cat":"Tools & Testers","grp":"","d":"Brake fluid tester, LED","u":"Each","price":33.02,"mq":1,"img":"","link":"","note":""},{"p":"KTI70211","cat":"Tools & Testers","grp":"","d":"Antifreeze tester","u":"Each","price":5.88,"mq":1,"img":"KTI70211.jpg","link":"","note":""},{"p":"KTI70150","cat":"Tools & Testers","grp":"","d":"Brake lining gauge (rainbow gauge)","u":"Each","price":14.14,"mq":1,"img":"","link":"","note":""},{"p":"1465","cat":"Tools & Testers","grp":"","d":"Disc brake pad spreader","u":"Each","price":9.68,"mq":1,"img":"","link":"","note":""},{"p":"CTA3110","cat":"Tools & Testers","grp":"","d":"Battery carrier","u":"Each","price":15.84,"mq":1,"img":"","link":"","note":""},{"p":"CTA3002","cat":"Tools & Testers","grp":"","d":"Battery memory saver","u":"Each","price":13.79,"mq":1,"img":"","link":"","note":""},{"p":"BRS49830-R","cat":"Tools & Testers","grp":"","d":"Squeegee, 30 in double blade","u":"Each","price":48.94,"mq":1,"img":"","link":"","note":""},{"p":"BRS6002-R","cat":"Tools & Testers","grp":"","d":"Squeegee handle, 60 in wood","u":"Each","price":27.3,"mq":1,"img":"","link":"","note":""},{"p":"14-301","cat":"Tire Repair","grp":"","d":"Brass tire brush, small","u":"Each","price":9.24,"mq":1,"img":"","link":"","note":""},{"p":"14-305","cat":"Tire Repair","grp":"","d":"Skiving knife, flexible","u":"Each","price":9.38,"mq":1,"img":"","link":"","note":""},{"p":"14-314","cat":"Tire Repair","grp":"","d":"Ball-bearing stitcher","u":"Each","price":5.33,"mq":1,"img":"","link":"","note":""},{"p":"14-315H","cat":"Tire Repair","grp":"","d":"Inner liner scraper","u":"Each","price":5.84,"mq":1,"img":"","link":"","note":""},{"p":"14-320","cat":"Tire Repair","grp":"","d":"Carbide buff wheel","u":"Each","price":4.63,"mq":1,"img":"","link":"","note":""},{"p":"14-359","cat":"Tire Repair","grp":"","d":"Buffing wheel","u":"Each","price":16.93,"mq":1,"img":"","link":"","note":""},{"p":"14-346","cat":"Tire Repair","grp":"","d":"Carbide cutter, 7/32 in","u":"Each","price":22.05,"mq":1,"img":"","link":"","note":""},{"p":"14-347","cat":"Tire Repair","grp":"","d":"Carbide cutter, 5/16 in","u":"Each","price":27.2,"mq":1,"img":"","link":"","note":""},{"p":"14-378L","cat":"Tire Repair","grp":"","d":"Cotton tire swab, 15 in","u":"Each","price":3.64,"mq":1,"img":"","link":"","note":""},{"p":"14-700MAP","cat":"Tire Repair","grp":"","d":"Tire mounting paste, 6.5 lb","u":"Each","price":10.16,"mq":1,"img":"","link":"","note":""},{"p":"14-905","cat":"Tire Repair","grp":"","d":"Wheel weight pliers","u":"Each","price":6.98,"mq":1,"img":"","link":"","note":""},{"p":"3000VC","cat":"Tire Repair","grp":"","d":"TPMS valve cores","u":"Bag of 100","price":11.0,"mq":100,"img":"","link":"","note":""},{"p":"100360","cat":"Wheel Weights","grp":"Stick-on","d":"Stick-on weights, 3 oz strips (1/4 oz segments)","u":"Box","price":39.31,"mq":1,"img":"","link":"","note":""},{"p":"300360","cat":"Wheel Weights","grp":"Stick-on","d":"Stick-on truck weights, 6 oz strips (1/2 oz segments)","u":"Box","price":78.52,"mq":1,"img":"","link":"","note":""},{"p":"AW025N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 0.25 oz","u":"Box of 25","price":3.39,"mq":1,"img":"","link":"","note":""},{"p":"AW050N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 0.50 oz","u":"Box of 25","price":5.51,"mq":1,"img":"","link":"","note":""},{"p":"AW075N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 0.75 oz","u":"Box of 25","price":6.72,"mq":1,"img":"","link":"","note":""},{"p":"AW100N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 1.00 oz","u":"Box of 25","price":8.55,"mq":1,"img":"","link":"","note":""},{"p":"AW125N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 1.25 oz","u":"Box of 25","price":10.15,"mq":1,"img":"","link":"","note":""},{"p":"AW150N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 1.50 oz","u":"Box of 25","price":11.94,"mq":1,"img":"","link":"","note":""},{"p":"AW175N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 1.75 oz","u":"Box of 25","price":13.2,"mq":1,"img":"","link":"","note":""},{"p":"AW200N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 2.00 oz","u":"Box of 25","price":14.42,"mq":1,"img":"","link":"","note":""},{"p":"AW225N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 2.25 oz","u":"Box of 25","price":16.13,"mq":1,"img":"","link":"","note":""},{"p":"AW250N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 2.50 oz","u":"Box of 25","price":17.55,"mq":1,"img":"","link":"","note":""},{"p":"AW275N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 2.75 oz","u":"Box of 25","price":19.05,"mq":1,"img":"","link":"","note":""},{"p":"AW300N","cat":"Wheel Weights","grp":"AW · Red · coated, oz","d":"AW coated clip-on, 3.00 oz","u":"Box of 25","price":20.54,"mq":1,"img":"","link":"","note":""},{"p":"IAW020","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 20 g","u":"Box of 25","price":7.0,"mq":1,"img":"","link":"","note":""},{"p":"IAW025","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 25 g","u":"Box of 25","price":8.71,"mq":1,"img":"","link":"","note":""},{"p":"IAW030","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 30 g","u":"Box of 25","price":10.56,"mq":1,"img":"","link":"","note":""},{"p":"IAW035","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 35 g","u":"Box of 25","price":12.39,"mq":1,"img":"","link":"","note":""},{"p":"IAW040","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 40 g","u":"Box of 25","price":12.74,"mq":1,"img":"","link":"","note":""},{"p":"IAW045","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 45 g","u":"Box of 25","price":13.89,"mq":1,"img":"","link":"","note":""},{"p":"IAW050","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 50 g","u":"Box of 25","price":14.42,"mq":1,"img":"","link":"","note":""},{"p":"IAW055","cat":"Wheel Weights","grp":"IAW · Blue · coated, grams","d":"IAW coated clip-on, 55 g","u":"Box of 25","price":14.74,"mq":1,"img":"","link":"","note":""},{"p":"MC025N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 0.25 oz","u":"Box","price":3.39,"mq":1,"img":"","link":"","note":""},{"p":"MC050N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 0.50 oz","u":"Box","price":4.89,"mq":1,"img":"","link":"","note":""},{"p":"MC075N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 0.75 oz","u":"Box","price":5.51,"mq":1,"img":"","link":"","note":""},{"p":"MC100N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 1.00 oz","u":"Box","price":6.72,"mq":1,"img":"","link":"","note":""},{"p":"MC125N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 1.25 oz","u":"Box","price":8.55,"mq":1,"img":"","link":"","note":""},{"p":"MC150N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 1.50 oz","u":"Box","price":10.15,"mq":1,"img":"","link":"","note":""},{"p":"MC175N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 1.75 oz","u":"Box","price":11.94,"mq":1,"img":"","link":"","note":""},{"p":"MC200N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 2.00 oz","u":"Box","price":13.2,"mq":1,"img":"","link":"","note":""},{"p":"MC225N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 2.25 oz","u":"Box","price":14.42,"mq":1,"img":"","link":"","note":""},{"p":"MC250N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 2.50 oz","u":"Box","price":16.13,"mq":1,"img":"","link":"","note":""},{"p":"MC275N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 2.75 oz","u":"Box","price":17.55,"mq":1,"img":"","link":"","note":""},{"p":"MC300N","cat":"Wheel Weights","grp":"MC · Yellow · alloy coated, oz","d":"MC alloy coated, 3.00 oz","u":"Box","price":22.21,"mq":1,"img":"","link":"","note":""},{"p":"LH025Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 0.25 oz","u":"Box","price":9.92,"mq":1,"img":"","link":"","note":""},{"p":"LH050Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 0.50 oz","u":"Box","price":12.92,"mq":1,"img":"","link":"","note":""},{"p":"LH075Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 0.75 oz","u":"Box","price":11.92,"mq":1,"img":"","link":"","note":""},{"p":"LH100Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 1.00 oz","u":"Box","price":14.16,"mq":1,"img":"","link":"","note":""},{"p":"LH125Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 1.25 oz","u":"Box","price":16.41,"mq":1,"img":"","link":"","note":""},{"p":"LH150Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 1.50 oz","u":"Box","price":23.39,"mq":1,"img":"","link":"","note":""},{"p":"LH175Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 1.75 oz","u":"Box","price":20.92,"mq":1,"img":"","link":"","note":""},{"p":"LH200Z","cat":"Wheel Weights","grp":"LH · Purple · zinc, oz","d":"LH zinc, 2.00 oz","u":"Box","price":29.04,"mq":1,"img":"","link":"","note":""},{"p":"P025","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 0.25 oz","u":"Box","price":3.36,"mq":1,"img":"","link":"","note":""},{"p":"P050","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 0.50 oz","u":"Box","price":5.75,"mq":1,"img":"","link":"","note":""},{"p":"P075","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 0.75 oz","u":"Box","price":8.34,"mq":1,"img":"","link":"","note":""},{"p":"P100","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 1.00 oz","u":"Box","price":11.15,"mq":1,"img":"","link":"","note":""},{"p":"P125","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 1.25 oz","u":"Box","price":14.16,"mq":1,"img":"","link":"","note":""},{"p":"P150","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 1.50 oz","u":"Box","price":16.09,"mq":1,"img":"","link":"","note":""},{"p":"P175","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 1.75 oz","u":"Box","price":20.08,"mq":1,"img":"","link":"","note":""},{"p":"P200","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 2.00 oz","u":"Box","price":23.04,"mq":1,"img":"","link":"","note":""},{"p":"P225","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 2.25 oz","u":"Box","price":26.72,"mq":1,"img":"","link":"","note":""},{"p":"P250","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 2.50 oz","u":"Box","price":30.31,"mq":1,"img":"","link":"","note":""},{"p":"P275","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 2.75 oz","u":"Box","price":33.26,"mq":1,"img":"","link":"","note":""},{"p":"P300","cat":"Wheel Weights","grp":"P · Black · lead, oz","d":"P lead, 3.00 oz","u":"Box","price":36.27,"mq":1,"img":"","link":"","note":""},{"p":"EN010Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 10 g","u":"Box","price":5.92,"mq":1,"img":"","link":"","note":""},{"p":"EN015Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 15 g","u":"Box","price":7.34,"mq":1,"img":"","link":"","note":""},{"p":"EN020Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 20 g","u":"Box","price":11.22,"mq":1,"img":"","link":"","note":""},{"p":"EN025Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 25 g","u":"Box","price":13.68,"mq":1,"img":"","link":"","note":""},{"p":"EN030Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 30 g","u":"Box","price":16.4,"mq":1,"img":"","link":"","note":""},{"p":"EN035Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 35 g","u":"Box","price":23.96,"mq":1,"img":"","link":"","note":""},{"p":"EN040Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 40 g","u":"Box","price":21.08,"mq":1,"img":"","link":"","note":""},{"p":"EN045Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 45 g","u":"Box","price":25.4,"mq":1,"img":"","link":"","note":""},{"p":"EN050Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 50 g","u":"Box","price":17.92,"mq":1,"img":"","link":"","note":""},{"p":"EN055Z","cat":"Wheel Weights","grp":"EN · Green · zinc coated, grams","d":"EN zinc coated, 55 g","u":"Box","price":19.34,"mq":1,"img":"","link":"","note":""},{"p":"FN005","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 5 g","u":"Box","price":4.64,"mq":1,"img":"","link":"","note":""},{"p":"FN010","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 10 g","u":"Box","price":5.63,"mq":1,"img":"","link":"","note":""},{"p":"FN015","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 15 g","u":"Box","price":6.37,"mq":1,"img":"","link":"","note":""},{"p":"FN020","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 20 g","u":"Box","price":7.0,"mq":1,"img":"","link":"","note":""},{"p":"FN025","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 25 g","u":"Box","price":8.84,"mq":1,"img":"","link":"","note":""},{"p":"FN030","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 30 g","u":"Box","price":10.56,"mq":1,"img":"","link":"","note":""},{"p":"FN035","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 35 g","u":"Box","price":12.39,"mq":1,"img":"","link":"","note":""},{"p":"FN040","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 40 g","u":"Box","price":12.74,"mq":1,"img":"","link":"","note":""},{"p":"FN045","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 45 g","u":"Box","price":13.89,"mq":1,"img":"","link":"","note":""},{"p":"FN050","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 50 g","u":"Box","price":14.42,"mq":1,"img":"","link":"","note":""},{"p":"FN055","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 55 g","u":"Box","price":14.74,"mq":1,"img":"","link":"","note":""},{"p":"FN060","cat":"Wheel Weights","grp":"FN · Orange · coated, grams","d":"FN coated, 60 g","u":"Box","price":15.21,"mq":1,"img":"","link":"","note":""},{"p":"00700333950","cat":"Hoses & Clamps","grp":"Hose","d":"Vacuum / wiper hose, 7/64 in","u":"Roll","price":23.16,"mq":1,"img":"","link":"","note":""},{"p":"00700334050","cat":"Hoses & Clamps","grp":"Hose","d":"Vacuum / wiper hose, 5/32 in","u":"Roll","price":25.89,"mq":1,"img":"","link":"","note":""},{"p":"00700334150","cat":"Hoses & Clamps","grp":"Hose","d":"Vacuum / wiper hose, 7/32 in","u":"Roll","price":27.44,"mq":1,"img":"","link":"","note":""},{"p":"00700025060","cat":"Hoses & Clamps","grp":"Hose","d":"Fuel hose 30R7, 1/4 in x 25 ft","u":"Roll","price":25.89,"mq":1,"img":"","link":"","note":""},{"p":"00700025078","cat":"Hoses & Clamps","grp":"Hose","d":"Fuel hose 30R7, 5/16 in x 25 ft","u":"Roll","price":27.23,"mq":1,"img":"","link":"","note":""},{"p":"00700001826","cat":"Hoses & Clamps","grp":"Hose","d":"Heater hose, 5/8 in x 50 ft","u":"Roll","price":65.92,"mq":1,"img":"","link":"","note":""},{"p":"00700001827","cat":"Hoses & Clamps","grp":"Hose","d":"Heater hose, 3/4 in x 50 ft","u":"Roll","price":55.23,"mq":1,"img":"","link":"","note":""},{"p":"00700001828","cat":"Hoses & Clamps","grp":"Hose","d":"Heater hose, 1 in x 50 ft","u":"Roll","price":103.53,"mq":1,"img":"","link":"","note":""},{"p":"62010","cat":"Hoses & Clamps","grp":"Clamps","d":"Hose clamp #10","u":"Pack of 10","price":4.1,"mq":10,"img":"","link":"","note":""},{"p":"62012","cat":"Hoses & Clamps","grp":"Clamps","d":"Hose clamp #12","u":"Pack of 10","price":4.1,"mq":10,"img":"","link":"","note":""},{"p":"62020","cat":"Hoses & Clamps","grp":"Clamps","d":"Hose clamp #20","u":"Pack of 10","price":4.1,"mq":10,"img":"","link":"","note":""},{"p":"62024","cat":"Hoses & Clamps","grp":"Clamps","d":"Hose clamp #24","u":"Pack of 10","price":4.3,"mq":10,"img":"","link":"","note":""},{"p":"62028","cat":"Hoses & Clamps","grp":"Clamps","d":"Hose clamp #28","u":"Pack of 10","price":4.3,"mq":10,"img":"","link":"","note":""},{"p":"62032","cat":"Hoses & Clamps","grp":"Clamps","d":"Hose clamp #32","u":"Pack of 10","price":4.3,"mq":10,"img":"","link":"","note":""},{"p":"62036","cat":"Hoses & Clamps","grp":"Clamps","d":"Hose clamp #36","u":"Pack of 10","price":4.3,"mq":10,"img":"","link":"","note":""},{"p":"32C-06","cat":"Plugs & Fasteners","grp":"","d":"Drain plug & gasket assortment","u":"Kit","price":187.69,"mq":1,"img":"","link":"","note":""},{"p":"8617","cat":"Plugs & Fasteners","grp":"","d":"24-hole gray plastic assortment (8617)","u":"Each","price":74.69,"mq":1,"img":"","link":"","note":""},{"p":"8619","cat":"Plugs & Fasteners","grp":"","d":"24-hole gray plastic assortment (8619)","u":"Each","price":77.62,"mq":1,"img":"","link":"","note":""},{"p":"030-709","cat":"Plugs & Fasteners","grp":"","d":"Nylon fastener assortment","u":"Each","price":36.18,"mq":1,"img":"","link":"","note":""},{"p":"030-724","cat":"Plugs & Fasteners","grp":"","d":"Import body retainer assortment","u":"Each","price":28.44,"mq":1,"img":"","link":"","note":""}]}</script>
+<script>
+/* ============================================================
+   CONFIG: paste the Apps Script web app URL (ends in /exec).
+   Leave it empty and the page runs in preview mode (nothing is sent).
+   ============================================================ */
+const API_URL = "https://script.google.com/macros/s/AKfycbxk75-YEs4MN7diRu8B3x49J54dM040IYrG6muyU5-vbDE-sHgJ-Ylx9nA5m7GQNAGj/exec";
+const PREVIEW = !/^https:\/\//.test(API_URL);
+
+/* ---- Delivery dates, cutoffs and budget periods (identical in the page and in Code.gs) ----
+   Dates are 'yyyy-mm-dd' strings and times 'yyyy-mm-dd HH:mm', all US Eastern. */
+var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var MON_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function ymdDate(s) { var a = s.split('-').map(Number); return new Date(Date.UTC(a[0], a[1] - 1, a[2], 12)); }
+function ymdStr(d) { return d.toISOString().slice(0, 10); }
+function addDays(s, n) { var d = ymdDate(s); d.setUTCDate(d.getUTCDate() + n); return ymdStr(d); }
+function dowOf(s) { return ymdDate(s).getUTCDay(); }
+function isBizDay(s, hol) { var w = dowOf(s); return w !== 0 && w !== 6 && hol.indexOf(s) < 0; }
+function bizDaysBefore(s, n, hol) { var d = s, c = 0; while (c < n) { d = addDays(d, -1); if (isBizDay(d, hol)) c++; } return d; }
+/* Next delivery whose cutoff hasn't passed. cfg = {cutoffDays, cutoffTime 'HH:mm', holidays []}.
+   Returns {delivery, cutoff, missed:{delivery,cutoff}|null, holiday:'yyyy-mm-dd'|null}. */
+function nextDelivery(day, now, cfg) {
+  var t = DOW.indexOf(day);
+  if (t < 0) return null;
+  var d = now.slice(0, 10), missed = null, holiday = null;
+  while (dowOf(d) !== t) d = addDays(d, 1);
+  for (var i = 0; i < 16; i++) {
+    if (cfg.holidays.indexOf(d) >= 0) { if (!holiday && !missed) holiday = d; d = addDays(d, 7); continue; }
+    var cut = bizDaysBefore(d, cfg.cutoffDays, cfg.holidays) + ' ' + cfg.cutoffTime;
+    if (now <= cut) return { delivery: d, cutoff: cut, missed: missed, holiday: holiday };
+    if (!missed) missed = { delivery: d, cutoff: cut };
+    d = addDays(d, 7);
+  }
+  return null;
+}
+/* Budget period an order counts toward (by its delivery date). */
+function periodFor(delivery, monthly, cfg) {
+  if (cfg.period === 'Week') {
+    var mon = addDays(delivery, -((dowOf(delivery) + 6) % 7));
+    return { key: 'W' + mon, label: 'week of ' + MON[+mon.slice(5, 7) - 1] + ' ' + (+mon.slice(8, 10)), budget: Math.round(monthly * 1200 / 52) / 100 };
+  }
+  return { key: delivery.slice(0, 7), label: MON_LONG[+delivery.slice(5, 7) - 1] + ' ' + delivery.slice(0, 4), budget: monthly };
+}
+function fmtShort(s) { return DOW[dowOf(s)] + ', ' + MON[+s.slice(5, 7) - 1] + ' ' + (+s.slice(8, 10)); }
+function fmtLong(s) { return DOW_LONG[dowOf(s)] + ', ' + MON_LONG[+s.slice(5, 7) - 1] + ' ' + (+s.slice(8, 10)) + ', ' + s.slice(0, 4); }
+function fmtClock(hm) { var h = +hm.slice(0, 2), m = hm.slice(3, 5); return (h % 12 || 12) + ':' + m + ' ' + (h < 12 ? 'AM' : 'PM'); }
+function fmtCut(st) { return fmtShort(st.slice(0, 10)) + ' at ' + fmtClock(st.slice(11, 16)); }
+function fmtStamp(st) { return st ? fmtShort(st.slice(0, 10)) + ', ' + st.slice(0, 4) + ' at ' + fmtClock(st.slice(11, 16)) : ''; }
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = (cents) => (cents < 0 ? "-" : "") + "$" + (Math.abs(cents) / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const cents = (dollars) => Math.round(Number(dollars || 0) * 100);
+const SWATCH = { AW: "#C8102E", IAW: "#1F63C6", MC: "#F2C200", LH: "#6E3FA3", P: "#1D2125", EN: "#2E8B57", FN: "#EE7B11" };
+const DRAFT_KEY = "jl-supply-draft-v1", INIT_KEY = "jl-supply-init-v1";
+
+let DATA = null, CFG = null, BY_PART = {}, STORE = null, STATUS = null, statusLoading = false;
+let cart = {};            // part -> qty
+let previewSpent = {};    // preview mode only: store -> cents ordered this session
+
+function store_get(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+function store_set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+function nowET() {
+  try {
+    const p = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+    const g = (t) => (p.find(x => x.type === t) || {}).value;
+    return `${g("year")}-${g("month")}-${g("day")} ${g("hour") === "24" ? "00" : g("hour")}:${g("minute")}`;
+  } catch (e) {
+    const d = new Date(), z = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
+  }
+}
+function imgUrl(img, size) { if (!img) return ""; return /^https?:\/\//.test(img) ? img : `img/${size}/${img}`; }
+
+/* ---------------- Boot ---------------- */
+async function boot() {
+  const draft = store_get(DRAFT_KEY) || {};
+  cart = draft.cart || {};
+  $("orderedBy").value = draft.name || "";
+  $("notes").value = draft.notes || "";
+
+  if (PREVIEW) {
+    setData(JSON.parse($("demoData").textContent));
+    showMode("Preview", "Orders placed here aren't sent anywhere. Connect the order sheet to go live.");
+  } else {
+    const cached = store_get(INIT_KEY);
+    if (cached && cached.catalog) setData(cached);
+    try {
+      const fresh = await getJSON(`${API_URL}?action=init`);
+      if (!fresh.ok) throw new Error(fresh.error || "init failed");
+      store_set(INIT_KEY, fresh);
+      setData(fresh);
+    } catch (e) {
+      if (!DATA) { $("catalog").innerHTML = `<p class="loading">The item list didn't load. Check your connection and reload the page.</p>`; return; }
+    }
+  }
+  if (draft.store && DATA.stores.some(s => s.n === draft.store)) chooseStore(draft.store, true);
+}
+
+function setData(d) {
+  const same = DATA && JSON.stringify(DATA.catalog) === JSON.stringify(d.catalog) && JSON.stringify(DATA.stores) === JSON.stringify(d.stores);
+  DATA = d;
+  CFG = d.settings;
+  BY_PART = {};
+  d.catalog.forEach(i => { BY_PART[i.p] = i; });
+  Object.keys(cart).forEach(p => { if (!BY_PART[p]) delete cart[p]; });
+  if (!PREVIEW && CFG.testMode) showMode("Test mode", "Order emails go to IT only until the order sheet is switched live.");
+  if (!same) { renderStores($("storeSearch").value); renderCatalog(); }
+  if (STORE) { STORE = DATA.stores.find(s => s.n === STORE.n) || null; renderChosen(); }
+  updateOrder();
+}
+function showMode(tag, text) { $("modeText").innerHTML = `<b>${esc(tag)}</b>${esc(text)}`; $("modeBar").hidden = false; }
+async function getJSON(url) { const r = await fetch(url, { redirect: "follow" }); return r.json(); }
+
+/* ---------------- Store picker ---------------- */
+function renderStores(q) {
+  const list = $("storeList");
+  if (!DATA) return;
+  const needle = String(q || "").trim().toLowerCase().replace(/^#/, "");
+  const hits = DATA.stores.filter(s => !needle || [s.n, s.street, s.city, s.st, `${s.city}, ${s.st}`].some(v => String(v).toLowerCase().includes(needle)));
+  if (!hits.length) { list.innerHTML = `<p class="empty-search">No store matches “${esc(q)}”. Try the store number or a city.</p>`; return; }
+  let html = "", last = "";
+  hits.forEach(s => {
+    const city = `${s.city}, ${s.st}`;
+    if (city !== last) { html += `<div class="city">${esc(city)}</div>`; last = city; }
+    html += `<button type="button" class="store-opt" role="listitem" data-n="${esc(s.n)}"><span class="sn">#${esc(s.n)}</span>` +
+      `<span style="min-width:0">${esc(s.street)}<small>${esc(s.city)}, ${esc(s.st)}</small></span>` +
+      `<span class="daychip">${esc(s.day)}<span class="dl"> delivery</span></span></button>`;
+  });
+  list.innerHTML = html;
+}
+$("storeList").addEventListener("click", (e) => { const b = e.target.closest(".store-opt"); if (b) chooseStore(b.dataset.n); });
+$("storeSearch").addEventListener("input", (e) => renderStores(e.target.value));
+$("storeSearch").addEventListener("keydown", (e) => { if (e.key === "Enter") { const b = $("storeList").querySelector(".store-opt"); if (b) chooseStore(b.dataset.n); } });
+$("changeStore").addEventListener("click", () => { $("chosen").hidden = true; $("picker").hidden = false; $("storeSearch").value = ""; renderStores(""); $("storeSearch").focus(); });
+
+function chooseStore(n, quiet) {
+  STORE = DATA.stores.find(s => s.n === n) || null;
+  if (!STORE) return;
+  STATUS = null;
+  $("picker").hidden = true; $("chosen").hidden = false;
+  $("pinWrap").hidden = !STORE.pin;
+  renderChosen();
+  saveDraft();
+  updateOrder();
+  loadStatus();
+  if (!quiet) $("chosen").scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+function deliveryInfo() {
+  return STORE ? nextDelivery(STORE.day, nowET(), CFG) : null;
+}
+
+function renderChosen() {
+  if (!STORE) return;
+  $("chosenNum").textContent = "#" + STORE.n;
+  $("chosenAddr").textContent = STORE.street;
+  $("chosenCity").textContent = `${STORE.city}, ${STORE.st} · ${DOW_LONG[DOW.indexOf(STORE.day)] || STORE.day} delivery`;
+  const dl = deliveryInfo();
+  if (!dl) { $("deliveryDate").textContent = "No delivery day set"; $("closes").textContent = "Tell your DM"; return; }
+  $("deliveryDate").textContent = fmtLong(dl.delivery);
+  const now = nowET(), today = now.slice(0, 10), cutDay = dl.cutoff.slice(0, 10);
+  const days = Math.round((ymdDate(cutDay) - ymdDate(today)) / 864e5);
+  const when = days <= 0 ? `today at ${fmtClock(dl.cutoff.slice(11))}` : days === 1 ? `tomorrow at ${fmtClock(dl.cutoff.slice(11))}` : fmtCut(dl.cutoff);
+  $("closes").textContent = `Order by ${when}`;
+  $("closes").classList.toggle("soon", days <= 1);
+  const notes = [];
+  if (dl.missed) notes.push(`Ordering for ${fmtShort(dl.missed.delivery)} closed ${fmtCut(dl.missed.cutoff)}, so this order comes the next week.`);
+  if (dl.holiday) notes.push(`No delivery ${fmtShort(dl.holiday)} (holiday).`);
+  $("missed").textContent = notes.join(" ");
+  $("missed").hidden = !notes.length;
+}
+
+async function loadStatus() {
+  if (!STORE) return;
+  const n = STORE.n;
+  if (PREVIEW) {
+    const dl = nextDelivery(STORE.day, nowET(), CFG);
+    const per = periodFor(dl.delivery, STORE.budget, CFG);
+    STATUS = { delivery: dl, period: { label: per.label, budget: per.budget, spent: (previewSpent[n] || 0) / 100 }, orders: [] };
+    renderChosen(); updateOrder(); return;
+  }
+  statusLoading = true; updateOrder();
+  try {
+    const r = await getJSON(`${API_URL}?action=status&store=${encodeURIComponent(n)}`);
+    if (STORE && STORE.n === n && r.ok) STATUS = r;
+  } catch (e) { /* budget shows as unavailable; ordering still works */ }
+  statusLoading = false;
+  renderChosen(); updateOrder();
+}
+
+/* ---------------- Catalog ---------------- */
+function qtyHtml(p, q) {
+  const label = esc((BY_PART[p] || {}).d || p);
+  return `<button type="button" class="minus" data-act="dec" data-p="${esc(p)}" aria-label="One less ${label}">−</button>` +
+    `<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="${q || 0}" data-p="${esc(p)}" aria-label="Quantity of ${label}">` +
+    `<button type="button" class="plus" data-act="inc" data-p="${esc(p)}" aria-label="One more ${label}">+</button>`;
+}
+
+function renderCatalog() {
+  const cats = [];
+  const byCat = {};
+  DATA.catalog.forEach(i => {
+    if (!byCat[i.cat]) { byCat[i.cat] = []; cats.push(i.cat); }
+    byCat[i.cat].push(i);
+  });
+  let html = "";
+  cats.forEach((c, ci) => {
+    const items = byCat[c];
+    const compact = !items.some(i => i.img);
+    html += `<section class="cat${compact ? " compact" : ""}" id="cat-${ci}" data-cat="${esc(c)}">` +
+      `<div class="cat-head"><h2 class="sec-title">${esc(c)}</h2><span class="count">${items.length} item${items.length === 1 ? "" : "s"}</span></div><div class="items">`;
+    let grp = null;
+    items.forEach(i => {
+      if (i.grp && i.grp !== grp) {
+        const code = i.grp.split(" ")[0];
+        html += `<div class="grp" data-grp>${SWATCH[code] ? `<span class="sw" style="background:${SWATCH[code]}"></span>` : ""}${esc(i.grp)}</div>`;
+      }
+      grp = i.grp;
+      const q = cart[i.p] || 0;
+      const thumb = compact ? "" : (i.img
+        ? `<button type="button" class="thumb" data-photo="${esc(i.p)}" aria-label="View photo of ${esc(i.d)}"><img loading="lazy" src="${esc(imgUrl(i.img, "t"))}" alt=""></button>`
+        : `<div class="thumb ph" aria-hidden="true">${esc(i.p)}</div>`);
+      const per = i.mq > 1 ? `<small>${money(Math.round(cents(i.price) / i.mq))} ea</small>` : "";
+      const hay = [i.p, i.d, i.u, i.cat, i.grp, i.note].join(" ").toLowerCase();
+      html += `<div class="item${q ? " in" : ""}" data-p="${esc(i.p)}" data-hay="${esc(hay)}">${thumb}` +
+        `<div class="info"><div class="name">${esc(i.d)}</div><div class="meta"><span class="part">${esc(i.p)}</span> · ${esc(i.u)}` +
+        `${i.note ? `<span class="note">${esc(i.note)}</span>` : ""}` +
+        `${i.link ? ` · <a href="${esc(i.link)}" target="_blank" rel="noopener">Product page</a>` : ""}</div></div>` +
+        `<div class="price">${money(cents(i.price))}${per}</div>` +
+        `<div class="qty">${qtyHtml(i.p, q)}</div></div>`;
+    });
+    html += `</div></section>`;
+  });
+  html += `<p class="empty-search" id="noHits" hidden></p>`;
+  $("catalog").innerHTML = html;
+  $("chips").innerHTML = cats.map((c, ci) => `<button type="button" class="chip" data-target="cat-${ci}" data-cat="${esc(c)}">${esc(c)}<span class="ct" hidden></span></button>`).join("");
+  applySearch();
+  measureToolbar();
+}
+
+function applySearch() {
+  const words = $("itemSearch").value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  let total = 0;
+  document.querySelectorAll(".cat").forEach(sec => {
+    let shown = 0;
+    let grpEl = null, grpShown = 0;
+    sec.querySelectorAll(".items > *").forEach(el => {
+      if (el.hasAttribute("data-grp")) { if (grpEl) grpEl.hidden = !grpShown; grpEl = el; grpShown = 0; return; }
+      const ok = words.every(w => el.dataset.hay.includes(w));
+      el.hidden = !ok;
+      if (ok) { shown++; grpShown++; }
+    });
+    if (grpEl) grpEl.hidden = !grpShown;
+    sec.hidden = !shown;
+    total += shown;
+    const chip = $("chips").querySelector(`[data-target="${sec.id}"]`);
+    if (chip) chip.hidden = !shown;
+  });
+  const nh = $("noHits");
+  if (nh) { nh.hidden = !!total; nh.textContent = total ? "" : `Nothing matches “${$("itemSearch").value.trim()}”. Add it under Special requests in your order instead.`; }
+}
+$("itemSearch").addEventListener("input", () => { applySearch(); });
+
+$("chips").addEventListener("click", (e) => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  const sec = $(c.dataset.target); if (sec) sec.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+});
+function measureToolbar() { document.documentElement.style.setProperty("--toolbar-h", ($("toolbar").offsetHeight + 8) + "px"); }
+addEventListener("resize", measureToolbar);
+let scrollTick = false;
+addEventListener("scroll", () => {
+  if (scrollTick) return; scrollTick = true;
+  requestAnimationFrame(() => {
+    scrollTick = false;
+    const line = $("toolbar").getBoundingClientRect().bottom + 12;
+    let active = null;
+    document.querySelectorAll(".cat:not([hidden])").forEach(s => { if (s.getBoundingClientRect().top <= line) active = s.id; });
+    document.querySelectorAll(".chip").forEach(ch => {
+      const on = ch.dataset.target === active;
+      if (on && !ch.classList.contains("on")) { const box = $("chips"); box.scrollLeft = ch.offsetLeft - box.clientWidth / 2 + ch.clientWidth / 2; }
+      ch.classList.toggle("on", on);
+    });
+  });
+}, { passive: true });
+
+/* Quantity controls (catalog rows, order lines and the photo viewer all share these) */
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-act]");
+  if (b) {
+    const p = b.dataset.p, q = cart[p] || 0;
+    if (b.dataset.act === "inc") setQty(p, q + 1);
+    if (b.dataset.act === "dec") setQty(p, q - 1);
+    if (b.dataset.act === "rm") setQty(p, 0);
+    return;
+  }
+  const ph = e.target.closest("[data-photo]");
+  if (ph) openPhoto(ph.dataset.photo);
+});
+document.addEventListener("change", (e) => {
+  const inp = e.target.closest(".qty input"); if (!inp) return;
+  setQty(inp.dataset.p, parseInt(inp.value.replace(/\D/g, ""), 10) || 0);
+});
+document.addEventListener("keydown", (e) => {
+  const inp = e.target.closest && e.target.closest(".qty input");
+  if (inp && e.key === "Enter") inp.blur();
+});
+document.addEventListener("focusin", (e) => { const inp = e.target.closest && e.target.closest(".qty input"); if (inp) inp.select(); });
+
+function setQty(p, q) {
+  if (!BY_PART[p]) return;
+  q = Math.max(0, Math.min(999, Math.floor(q) || 0));
+  if (q) cart[p] = q; else delete cart[p];
+  document.querySelectorAll(`.qty input[data-p="${CSS.escape(p)}"]`).forEach(i => { if (i.value !== String(q)) i.value = q; });
+  const row = document.querySelector(`.item[data-p="${CSS.escape(p)}"]`);
+  if (row) row.classList.toggle("in", !!q);
+  saveDraft();
+  updateOrder();
+}
+
+/* ---------------- Order panel ---------------- */
+function orderLines() {
+  return DATA ? DATA.catalog.filter(i => cart[i.p]).map(i => ({ ...i, q: cart[i.p], c: cents(i.price) * cart[i.p] })) : [];
+}
+
+function budgetState(totalC) {
+  if (!STORE || !STATUS || !STATUS.period) return null;
+  const budgetC = cents(STATUS.period.budget), spentC = cents(STATUS.period.spent);
+  const overC = budgetC > 0 ? spentC + totalC - budgetC : 0;
+  return { label: STATUS.period.label, budgetC, spentC, totalC, leftC: budgetC - spentC - totalC, overC, over: budgetC > 0 && totalC > 0 && overC > 0 };
+}
+
+function approverName() { return STORE && STORE.dm ? STORE.dm : "your DM"; }
+
+function updateOrder() {
+  if (!DATA) return;
+  const lines = orderLines();
+  const totalC = lines.reduce((a, l) => a + l.c, 0);
+  const count = lines.reduce((a, l) => a + l.q, 0);
+  const b = budgetState(totalC);
+
+  // Lines
+  $("lines").innerHTML = lines.length ? lines.map(l => `<li class="line"><span class="ln">${esc(l.d)}</span><span class="lt">${money(l.c)}</span>` +
+    `<span class="lm"><span><span class="part">${esc(l.p)}</span> · ${money(cents(l.price))} / ${esc(l.u.toLowerCase())}</span>` +
+    `<span class="mini"><button type="button" data-act="dec" data-p="${esc(l.p)}" aria-label="One less">−</button><span class="num">${l.q}</span>` +
+    `<button type="button" data-act="inc" data-p="${esc(l.p)}" aria-label="One more">+</button></span></span></li>`).join("")
+    : `<li class="sum-empty">Nothing added yet. Tap <b>+</b> next to an item to add it.</li>`;
+  $("total").textContent = money(totalC);
+
+  // Budget box
+  const bx = $("budget");
+  bx.classList.toggle("over", !!(b && b.over));
+  if (!STORE) bx.innerHTML = `<p class="b-muted">Pick your store above to see your delivery date and budget.</p>`;
+  else if (!b) bx.innerHTML = `<p class="b-muted">${statusLoading ? "Checking this month's budget…" : "Budget isn't available right now. You can still send the order."}</p>`;
+  else {
+    const scale = Math.max(b.budgetC, b.spentC + b.totalC, 1);
+    const pct = (v) => (Math.max(0, v) / scale * 100).toFixed(2) + "%";
+    const orders = (STATUS.orders || []).filter(o => o.status);
+    bx.innerHTML = `<div class="b-top"><span class="label" style="margin:0">${esc(cap(b.label))} budget</span><b>${b.budgetC ? money(b.budgetC) : "No limit"}</b></div>` +
+      (b.budgetC ? `<div class="meter" role="img" aria-label="${money(b.spentC)} already ordered plus ${money(b.totalC)} this order, of ${money(b.budgetC)}">` +
+        `<i class="m-spent" style="width:${pct(b.spentC)}"></i><i class="m-this" style="width:${pct(b.totalC)}"></i>` +
+        `${b.spentC + b.totalC > b.budgetC ? `<span class="m-mark" style="left:${pct(b.budgetC)}"></span>` : ""}</div>` : "") +
+      `<dl class="b-figs"><div><dt>Already ordered</dt><dd>${money(b.spentC)}</dd></div><div><dt>This order</dt><dd>${money(b.totalC)}</dd></div>` +
+      `<div><dt>${b.leftC < 0 ? "Over by" : "Left"}</dt><dd>${b.budgetC ? money(Math.abs(b.leftC)) : "—"}</dd></div></dl>` +
+      (b.over ? `<p class="b-note">This order goes over the budget, so ${esc(approverName())} has to approve it before Mighty gets it.</p>` : "") +
+      (orders.length ? `<ul class="b-orders">${orders.map(o => `<li><span>${esc(o.id)} · ${esc(fmtShort(o.delivery))} · ${esc(o.status)}</span><span class="num">${money(cents(o.total))}</span></li>`).join("")}</ul>` : "");
+  }
+
+  // Button + bar
+  const btn = $("submitBtn");
+  if (!btn.dataset.busy) {
+    btn.textContent = b && b.over ? `Send to ${approverName().split(" ")[0]} for approval` : "Send order to Mighty";
+    btn.classList.toggle("amber", !!(b && b.over));
+  }
+  $("fine").textContent = b && b.over
+    ? `${approverName()} gets an email to approve or decline. Mighty gets the order once it's approved.`
+    : "Mighty gets the order. Your store, your DM and Robert Gayle get a copy.";
+  $("barTotal").textContent = money(totalC);
+  const sub = $("barSub");
+  sub.classList.toggle("over", !!(b && b.over));
+  sub.textContent = !count ? (STORE ? `#${STORE.n} · nothing added yet` : "Pick your store to start")
+    : `${count} item${count === 1 ? "" : "s"}` + (b && b.budgetC ? (b.over ? ` · ${money(b.overC)} over budget` : ` · ${money(b.leftC)} left`) : "");
+
+  // Chip counts
+  const perCat = {};
+  lines.forEach(l => { perCat[l.cat] = (perCat[l.cat] || 0) + 1; });
+  document.querySelectorAll(".chip").forEach(ch => { const n = perCat[ch.dataset.cat] || 0; const ct = ch.querySelector(".ct"); ct.hidden = !n; ct.textContent = n; });
+}
+function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
+
+function saveDraft() { store_set(DRAFT_KEY, { store: STORE ? STORE.n : null, cart, name: $("orderedBy").value, notes: $("notes").value }); }
+$("orderedBy").addEventListener("input", saveDraft);
+$("notes").addEventListener("input", saveDraft);
+
+/* Phone order sheet */
+$("openSheet").addEventListener("click", () => { document.body.classList.add("sheet-open"); $("sumScroll").scrollTop = 0; $("closeSheet").focus(); });
+$("closeSheet").addEventListener("click", closeSheet);
+function closeSheet() { document.body.classList.remove("sheet-open"); }
+addEventListener("keydown", (e) => { if (e.key === "Escape" && document.body.classList.contains("sheet-open") && !$("photoDlg").open) closeSheet(); });
+
+/* ---------------- Submit ---------------- */
+function showError(msg) { const el = $("formError"); el.textContent = msg; el.hidden = !msg; if (msg) el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+
+$("submitBtn").addEventListener("click", async () => {
+  showError("");
+  const lines = orderLines();
+  const notes = $("notes").value.trim();
+  const name = $("orderedBy").value.trim();
+  if (!STORE) { showError("Pick your store first (top of the page)."); closeSheet(); $("picker").scrollIntoView({ block: "start", behavior: "smooth" }); $("storeSearch").focus(); return; }
+  if (!lines.length && !notes) { showError("Add at least one item, or describe what you need under Special requests."); return; }
+  if (!name) { showError("Enter your name so Mighty and your DM know who placed the order."); $("orderedBy").focus(); return; }
+  if (STORE.pin && !$("pin").value.trim()) { showError("Enter your store's order PIN."); $("pin").focus(); return; }
+
+  const btn = $("submitBtn");
+  btn.dataset.busy = "1"; btn.disabled = true;
+  btn.innerHTML = `<span class="spin" aria-hidden="true"></span>Sending…`;
+  const totalC = lines.reduce((a, l) => a + l.c, 0);
+  try {
+    let r;
+    if (PREVIEW) {
+      await new Promise(res => setTimeout(res, 700));
+      const b = budgetState(totalC), dl = deliveryInfo();
+      r = { ok: true, id: "JLS-PREVIEW", status: b && b.over ? "pending" : "sent", delivery: dl.delivery, total: totalC / 100,
+            overBy: b ? Math.max(0, b.overC) / 100 : 0, periodLabel: b ? b.label : "", approver: approverName() };
+      previewSpent[STORE.n] = (previewSpent[STORE.n] || 0) + totalC;
+    } else {
+      const resp = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },   // text/plain skips a CORS preflight Apps Script can't answer
+        body: JSON.stringify({
+          action: "submit", store: STORE.n, orderedBy: name, notes, pin: $("pin").value.trim(), website: $("website").value,
+          items: lines.map(l => ({ p: l.p, q: l.q })), clientTotal: totalC / 100,
+        }),
+        redirect: "follow",
+      });
+      r = await resp.json().catch(() => ({}));
+      if (!r.ok) throw new Error(r.error || "send failed");
+    }
+    showDone(r, lines);
+    cart = {}; $("notes").value = "";
+    document.querySelectorAll(".item.in").forEach(el => el.classList.remove("in"));
+    document.querySelectorAll(".qty input").forEach(i => { i.value = 0; });
+    saveDraft();
+    loadStatus();
+  } catch (err) {
+    const m = err && err.message;
+    showError(m && !/send failed|Failed to fetch|NetworkError|Load failed/i.test(m) ? m : "The order didn't send. Check your connection and press the button again.");
+  } finally {
+    delete btn.dataset.busy; btn.disabled = false; updateOrder();
+  }
+});
+
+function showDone(r, lines) {
+  const pending = r.status === "pending";
+  const count = lines.reduce((a, l) => a + l.q, 0);
+  $("doneView").innerHTML =
+    `<span class="stamp${pending ? " wait" : ""}">${pending ? "Waiting on approval" : "Sent to Mighty"}</span>` +
+    `<h3>${pending ? `Sent to ${esc(r.approver)}` : "Order placed"}</h3>` +
+    `<p>${pending
+      ? `This order is ${money(cents(r.overBy))} over the ${esc(r.periodLabel)} budget. ${esc(r.approver)} got an email to approve it. Mighty gets it as soon as it's approved.`
+      : `Mighty has the order. Your store and your DM were copied on the email.`}</p>` +
+    `<dl><dt>Order #</dt><dd>${esc(r.id)}</dd><dt>Store</dt><dd>#${esc(STORE.n)}</dd>` +
+    `<dt>Delivery</dt><dd>${esc(fmtLong(r.delivery))}</dd><dt>Items</dt><dd>${count}</dd><dt>Total</dt><dd>${money(cents(r.total))}</dd></dl>` +
+    (PREVIEW ? `<p class="b-muted">Preview mode: nothing was emailed.</p>` : r.testMode ? `<p class="b-muted">Test mode: the email went to IT only.</p>` : "") +
+    `<button type="button" class="ghost" id="newOrder">Start a new order</button>`;
+  $("orderView").hidden = true; $("doneView").hidden = false;
+  $("newOrder").addEventListener("click", () => { $("doneView").hidden = true; $("orderView").hidden = false; closeSheet(); scrollTo({ top: 0, behavior: "smooth" }); });
+  document.body.classList.add("sheet-open");
+  $("sumScroll").scrollTop = 0;
+  $("summary").scrollIntoView({ block: "start", behavior: "smooth" });
+}
+
+/* ---------------- Photo viewer ---------------- */
+function openPhoto(p) {
+  const i = BY_PART[p]; if (!i) return;
+  $("dlgImg").src = imgUrl(i.img, "f");
+  $("dlgImg").alt = i.d;
+  $("dlgName").textContent = i.d;
+  $("dlgMeta").innerHTML = `<span class="part">${esc(i.p)}</span> · ${esc(i.u)} · <b>${money(cents(i.price))}</b>`;
+  $("dlgQty").innerHTML = qtyHtml(i.p, cart[i.p] || 0);
+  $("photoDlg").showModal();
+}
+$("dlgClose").addEventListener("click", () => $("photoDlg").close());
+$("photoDlg").addEventListener("click", (e) => { if (e.target === $("photoDlg")) $("photoDlg").close(); });
+
+let lastDelivery = "";
+setInterval(() => {
+  if (!STORE) return;
+  const dl = deliveryInfo();
+  renderChosen();
+  if (dl && lastDelivery && dl.delivery !== lastDelivery) loadStatus();
+  lastDelivery = dl ? dl.delivery : "";
+}, 60000);
+boot();
+</script>
+
+</html>
