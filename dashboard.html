@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{padding-top:env(safe-area-inset-top,0px)}</style>
+<title>Supply Budget Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Budget pacing dashboard for DMs, Robert, Tripp and Mighty. Same brand system as the order page.
+   Layout: red masthead, one filter row, KPI tiles, approvals, store pacing list, then item tables. */
+:root {
+  --brand: #C8102E; --brand-ink: #9E0B23; --brand-wash: #FBEFF2;
+  --ink: #1D2125; --ink-soft: #4A5058; --muted: #6B727A; --line: #D6D9DE; --mist: #EEF0F2; --paper: #FFFFFF; --bg: #F6F7F8;
+  --amber: #FFC72C; --amber-wash: #FFF4D1; --amber-ink: #7A5200; --ok: #1E7B4A; --ok-wash: #E7F4EC; --band: #C8102E;
+  /* data marks: one hue for spend (pending = same hue, striped); status colors reserved for state */
+  --spend: #2a78d6; --track: #E3ECF8; --pace: #1D2125;
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+  --warn-cell: #FFF4D1; --bad-cell: #FBE9E9;
+  --shadow: 0 1px 2px rgba(29,33,37,.06), 0 6px 20px rgba(29,33,37,.08);
+  --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand-ink: #FF8C9C; --brand-wash: #33191E; --ink: #ECEEF0; --ink-soft: #A9B0B8; --muted: #8C939B; --line: #31363C; --mist: #262A2F;
+    --paper: #1B1E22; --bg: #121417; --amber-wash: #3A2F12; --amber-ink: #FFD467; --ok: #67CB92; --ok-wash: #163222; --band: #A30D26;
+    --spend: #3987e5; --track: #22303F; --pace: #ECEEF0; --warn-cell: #3A2F12; --bad-cell: #3A1D1F;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --brand-ink: #FF8C9C; --brand-wash: #33191E; --ink: #ECEEF0; --ink-soft: #A9B0B8; --muted: #8C939B; --line: #31363C; --mist: #262A2F;
+  --paper: #1B1E22; --bg: #121417; --amber-wash: #3A2F12; --amber-ink: #FFD467; --ok: #67CB92; --ok-wash: #163222; --band: #A30D26;
+  --spend: #3987e5; --track: #22303F; --pace: #ECEEF0; --warn-cell: #3A2F12; --bad-cell: #3A1D1F;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35); color-scheme: dark;
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.45 var(--body); -webkit-font-smoothing: antialiased; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1280px; margin: 0 auto; }
+.num { font-variant-numeric: tabular-nums; }
+
+.masthead { background: var(--band); color: #fff; }
+.masthead .wrap { padding-block: 18px 20px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px 24px; }
+.brandline { margin: 0 0 4px; font: 700 14px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.masthead h1 { margin: 0; font: 800 clamp(30px, 5.4vw, 44px)/.95 var(--display); }
+.who { margin: 0; font-size: 15px; opacity: .92; text-align: right; }
+.who b { font-weight: 600; }
+.modebar { background: var(--ink); color: var(--paper); font-size: 14px; }
+.modebar .wrap { padding-block: 8px; }
+.modebar b { color: var(--amber); letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin-right: 6px; }
+
+/* Filter row */
+.filters { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding-block: 16px 4px; }
+.month { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+.month button { border: 0; background: none; width: 40px; height: 42px; font-size: 20px; }
+.month button:disabled { opacity: .3; cursor: default; }
+.month span { font: 700 19px/1 var(--display); min-width: 150px; text-align: center; padding: 0 4px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.seg button { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 8px 13px; font: 600 14px/1 var(--body); white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.seg button small { font-weight: 500; opacity: .75; margin-left: 4px; }
+.sortsel { border: 1px solid var(--line); background: var(--paper); border-radius: 10px; padding: 9px 10px; font-size: 14px; }
+.spacer { flex: 1; }
+.updated { font-size: 13px; color: var(--ink-soft); display: inline-flex; gap: 8px; align-items: center; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--brand-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+/* KPI tiles */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; padding-block: 12px; }
+.tile { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.tile .k { font: 700 12px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.tile .v { font: 700 30px/1.05 var(--body); }
+.tile .s { font-size: 14px; color: var(--ink-soft); }
+.tile.hero { grid-column: span 2; }
+.tile.hero .v { font-size: 48px; }
+@media (max-width: 640px) { .tile.hero { grid-column: auto; } .tile.hero .v { font-size: 40px; } }
+
+/* Meter: spend fills the track; pending is the same hue, striped; the pace marker is budget to date */
+.meter { position: relative; height: 10px; border-radius: 999px; background: var(--track); display: flex; overflow: visible; margin: 6px 0 2px; }
+.meter i { display: block; height: 100%; }
+.meter i:first-child { border-radius: 999px 0 0 999px; }
+.meter .sp { background: var(--spend); }
+.meter .pd { background: repeating-linear-gradient(135deg, var(--spend) 0 3px, color-mix(in srgb, var(--spend) 30%, var(--paper)) 3px 6px); }
+.meter .pace { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--pace); border-radius: 1px; }
+.meter .cap { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--critical); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-soft); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.key { display: inline-block; width: 14px; height: 10px; border-radius: 3px; }
+.key.sp { background: var(--spend); }
+.key.pd { background: repeating-linear-gradient(135deg, var(--spend) 0 3px, color-mix(in srgb, var(--spend) 30%, var(--paper)) 3px 6px); }
+.key.pace { width: 2px; height: 14px; background: var(--pace); border-radius: 1px; }
+
+/* Status: color + icon + label, never color alone */
+.st { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.st svg { width: 16px; height: 16px; flex: none; }
+.st.good svg { color: var(--good); } .st.warn svg { color: var(--warning); } .st.bad svg { color: var(--critical); } .st.none svg { color: var(--muted); }
+
+/* Cards */
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); }
+.card-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; padding: 14px 16px 10px; }
+.card-h h2 { margin: 0; font: 800 24px/1.1 var(--display); }
+.card-h p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+section { margin-top: 18px; }
+
+/* Approvals */
+.appr { list-style: none; margin: 0; padding: 0; }
+.appr li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 16px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line); }
+.appr .late { color: var(--amber-ink); font-weight: 600; }
+.more { display: block; width: 100%; border: 0; border-top: 1px solid var(--line); background: none; padding: 12px 16px; text-align: left; color: var(--brand-ink); font-weight: 600; }
+.appr .t { font-weight: 600; }
+.appr .m { font-size: 14px; color: var(--ink-soft); }
+.appr .amt { font: 700 20px/1 var(--body); text-align: right; }
+.appr .go { justify-self: end; border: 0; background: var(--brand); color: #fff; border-radius: 10px; padding: 9px 14px; font: 700 16px/1 var(--display); letter-spacing: .02em; text-decoration: none; }
+.tag { display: inline-block; font: 700 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; border-radius: 999px; padding: 4px 7px; background: var(--mist); color: var(--ink-soft); vertical-align: 2px; margin-right: 6px; }
+.tag.inv { background: var(--amber-wash); color: var(--amber-ink); }
+.empty { padding: 14px 16px 18px; color: var(--ink-soft); margin: 0; }
+
+/* Store pacing list */
+.rows { border-top: 1px solid var(--line); }
+.dhead { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 9px 16px; background: var(--mist); font: 700 14px/1.2 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--line); }
+.dhead span:last-child { text-transform: none; letter-spacing: 0; font: 600 14px/1.2 var(--body); }
+.srow { display: grid; grid-template-columns: 190px minmax(200px, 1fr) minmax(300px, 1.25fr) 130px 96px; gap: 8px 18px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.colh { display: grid; grid-template-columns: 190px minmax(200px, 1fr) minmax(300px, 1.25fr) 130px 96px; gap: 18px; padding: 8px 16px; font: 700 12px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.colh .r, .srow .r { text-align: right; }
+.sn { font: 700 18px/1 var(--display); }
+.sc { font-size: 14px; color: var(--ink-soft); }
+.figs { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.figs b { font-size: 16px; }
+.weeks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.wk { border-radius: 8px; background: var(--mist); padding: 6px 7px 7px; min-width: 0; position: relative; outline-offset: 1px; }
+.wk .d { display: block; font-size: 11px; color: var(--ink-soft); white-space: nowrap; }
+.wk .a { display: block; font-weight: 700; font-size: 14px; white-space: nowrap; }
+.wk .bar { display: block; height: 4px; border-radius: 2px; background: var(--track); margin-top: 4px; overflow: hidden; }
+.wk .bar i { display: block; height: 100%; background: var(--spend); border-radius: 2px; }
+.wk.over { background: var(--warn-cell); }
+.wk.over .a::after { content: " ▲"; font-size: 10px; color: var(--amber-ink); }
+.wk.open { box-shadow: inset 0 0 0 2px var(--ink-soft); }
+.wk.future { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.wk.future .a { color: var(--muted); font-weight: 500; }
+.wk.none { visibility: hidden; }
+.inv { font-weight: 600; }
+.inv small { display: block; font-weight: 400; font-size: 13px; color: var(--ink-soft); }
+@media (max-width: 1080px) {
+  .colh { display: none; }
+  .srow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "store status" "meter meter" "weeks weeks" "inv inv"; }
+  .srow > :nth-child(1) { grid-area: store; } .srow > :nth-child(2) { grid-area: meter; } .srow > :nth-child(3) { grid-area: weeks; }
+  .srow > :nth-child(4) { grid-area: status; text-align: right; } .srow > :nth-child(5) { grid-area: inv; text-align: left; }
+  .srow .inv small { display: inline; margin-left: 6px; }
+  .srow .inv::before { content: "Inventory parts: "; font-weight: 400; color: var(--ink-soft); font-size: 14px; }
+}
+
+/* Tables */
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font: 700 12px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); padding: 8px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 9px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.part { font: 600 13px/1 var(--display); letter-spacing: .05em; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.acct { padding: 4px 16px 16px; display: grid; gap: 10px; }
+.arow { display: grid; grid-template-columns: 150px minmax(0, 1fr) 90px; gap: 12px; align-items: center; font-size: 14px; }
+.arow .hb { height: 14px; border-radius: 0 4px 4px 0; background: var(--spend); min-width: 2px; }
+.arow .hb.inv { background: repeating-linear-gradient(135deg, var(--muted) 0 3px, transparent 3px 6px); border: 1px solid var(--muted); border-left: 0; }
+
+/* Tooltip */
+.tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--paper); border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.35; max-width: 260px; box-shadow: var(--shadow); }
+.tip b { font-size: 15px; display: block; }
+
+.gate { max-width: 560px; margin: 40px auto; padding: 24px; text-align: center; }
+.gate h2 { font: 800 28px/1.1 var(--display); margin: 0 0 8px; }
+.loading { opacity: .55; transition: opacity .2s; }
+footer { text-align: center; color: var(--ink-soft); font-size: 13px; padding-block: 28px 40px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (max-width: 700px) {
+  .who { text-align: left; }
+  .month span { min-width: 120px; font-size: 17px; }
+  .appr li { grid-template-columns: minmax(0, 1fr); }
+  .appr li { grid-template-columns: minmax(0, 1fr) auto; } .appr .amt { text-align: left; } .appr .go { justify-self: end; }
+  .arow { grid-template-columns: 110px minmax(0, 1fr) 76px; }
+  td, th { padding-left: 12px; padding-right: 12px; }
+}
+</style>
+
+<header class="masthead">
+  <div class="wrap gutter">
+    <div>
+      <p class="brandline">Jiffy Lube · Carolinas</p>
+      <h1>Supply Budget Dashboard</h1>
+    </div>
+    <p class="who" id="who"></p>
+  </div>
+</header>
+<div class="modebar" id="modeBar" hidden><div class="wrap gutter"><b>Test mode</b>Orders and emails are still going to the test list only.</div></div>
+
+<main class="wrap gutter" id="app">
+  <div class="filters" id="filters" hidden>
+    <div class="month" role="group" aria-label="Month">
+      <button type="button" id="prevM" aria-label="Previous month">‹</button><span id="monthLabel"></span><button type="button" id="nextM" aria-label="Next month">›</button>
+    </div>
+    <div class="seg" id="districts" role="group" aria-label="District"></div>
+    <label><span class="sr" hidden>Sort</span>
+      <select class="sortsel" id="sort" aria-label="Sort stores">
+        <option value="district">Sort by district</option>
+        <option value="pace">Most ahead of pace first</option>
+        <option value="used">Most of the month used</option>
+        <option value="store">Store number</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <span class="updated"><span id="updated"></span><button type="button" class="linkbtn" id="refresh">Refresh</button></span>
+  </div>
+  <div id="content"><div class="gate"><p>Loading the dashboard…</p></div></div>
+</main>
+<footer class="gutter">CISA Lubes · Supply budgets cover Operating Supplies, Small Tools and Office Supplies. Inventory parts are tracked separately.</footer>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxk75-YEs4MN7diRu8B3x49J54dM040IYrG6muyU5-vbDE-sHgJ-Ylx9nA5m7GQNAGj/exec";
+/* ---- Delivery dates, cutoffs and budgets (identical in the page, the dashboard and Code.gs) ----
+   Dates are 'yyyy-mm-dd' strings and times 'yyyy-mm-dd HH:mm', all US Eastern. */
+var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var MON_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function ymdDate(s) { var a = s.split('-').map(Number); return new Date(Date.UTC(a[0], a[1] - 1, a[2], 12)); }
+function ymdStr(d) { return d.toISOString().slice(0, 10); }
+function addDays(s, n) { var d = ymdDate(s); d.setUTCDate(d.getUTCDate() + n); return ymdStr(d); }
+function dowOf(s) { return ymdDate(s).getUTCDay(); }
+function isBizDay(s, hol) { var w = dowOf(s); return w !== 0 && w !== 6 && hol.indexOf(s) < 0; }
+function bizDaysBefore(s, n, hol) { var d = s, c = 0; while (c < n) { d = addDays(d, -1); if (isBizDay(d, hol)) c++; } return d; }
+/* Next delivery whose cutoff hasn't passed. cfg = {cutoffDays, cutoffTime 'HH:mm', holidays []}.
+   Returns {delivery, cutoff, missed:{delivery,cutoff}|null, holiday:'yyyy-mm-dd'|null}. */
+function nextDelivery(day, now, cfg) {
+  var t = DOW.indexOf(day);
+  if (t < 0) return null;
+  var d = now.slice(0, 10), missed = null, holiday = null;
+  while (dowOf(d) !== t) d = addDays(d, 1);
+  for (var i = 0; i < 16; i++) {
+    if (cfg.holidays.indexOf(d) >= 0) { if (!holiday && !missed) holiday = d; d = addDays(d, 7); continue; }
+    var cut = bizDaysBefore(d, cfg.cutoffDays, cfg.holidays) + ' ' + cfg.cutoffTime;
+    if (now <= cut) return { delivery: d, cutoff: cut, missed: missed, holiday: holiday };
+    if (!missed) missed = { delivery: d, cutoff: cut };
+    d = addDays(d, 7);
+  }
+  return null;
+}
+/* A store's delivery dates in a month ('yyyy-mm'), skipping holidays. */
+function deliveriesInMonth(day, ym, hol) {
+  var t = DOW.indexOf(day), out = [];
+  if (t < 0) return out;
+  var d = ym + '-01';
+  while (dowOf(d) !== t) d = addDays(d, 1);
+  while (d.slice(0, 7) === ym) { if (hol.indexOf(d) < 0) out.push(d); d = addDays(d, 7); }
+  return out;
+}
+/* Weekly budget = the monthly budget split evenly over that month's deliveries (the last one takes the
+   rounding cents, so the weeks add up to the month exactly). Orders count toward the week and month
+   of their delivery date. */
+function weekBudgetC(monthlyC, n, idx) {
+  if (n < 1) return monthlyC;
+  var w = Math.round(monthlyC / n);
+  return idx === n - 1 ? monthlyC - w * (n - 1) : w;
+}
+function budgetFor(delivery, day, monthly, cfg) {
+  var ym = delivery.slice(0, 7), dels = deliveriesInMonth(day, ym, cfg.holidays);
+  var idx = dels.indexOf(delivery), n = dels.length, mC = Math.round(monthly * 100);
+  var wk = weekStart(delivery);
+  return {
+    week: { key: delivery, label: 'week of ' + MON[+wk.slice(5, 7) - 1] + ' ' + (+wk.slice(8, 10)), budget: weekBudgetC(mC, n, idx < 0 ? 0 : idx) / 100 },
+    month: { key: ym, label: monthLabel(ym), budget: monthly, n: n, index: idx < 0 ? n : idx + 1, deliveries: dels },
+  };
+}
+function weekStart(s) { return addDays(s, -((dowOf(s) + 6) % 7)); }   /* Monday of that week */
+function monthLabel(ym) { return MON_LONG[+ym.slice(5, 7) - 1] + ' ' + ym.slice(0, 4); }
+function addMonths(ym, n) { var y = +ym.slice(0, 4), m = +ym.slice(5, 7) - 1 + n; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12; return y + '-' + ('0' + (m + 1)).slice(-2); }
+function fmtShort(s) { return DOW[dowOf(s)] + ', ' + MON[+s.slice(5, 7) - 1] + ' ' + (+s.slice(8, 10)); }
+function fmtLong(s) { return DOW_LONG[dowOf(s)] + ', ' + MON_LONG[+s.slice(5, 7) - 1] + ' ' + (+s.slice(8, 10)) + ', ' + s.slice(0, 4); }
+function fmtClock(hm) { var h = +hm.slice(0, 2), m = hm.slice(3, 5); return (h % 12 || 12) + ':' + m + ' ' + (h < 12 ? 'AM' : 'PM'); }
+function fmtCut(st) { return fmtShort(st.slice(0, 10)) + ' at ' + fmtClock(st.slice(11, 16)); }
+function fmtStamp(st) { return st ? fmtShort(st.slice(0, 10)) + ', ' + st.slice(0, 4) + ' at ' + fmtClock(st.slice(11, 16)) : ''; }
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const cents = (d) => Math.round(Number(d || 0) * 100);
+const money = (c, whole) => (c < 0 ? "-" : "") + "$" + (whole ? Math.round(Math.abs(c) / 100).toString() : (Math.abs(c) / 100).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const pctOf = (a, b) => (b > 0 ? Math.round(a / b * 100) : 0);
+const KEY_STORE = "jl-dash-key", PREF_STORE = "jl-dash-prefs";
+const ICON = {
+  good: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M4.8 8.3l2.1 2.1 4.3-4.6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  warn: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l7 12.5H1z" fill="currentColor"/><path d="M8 6v3.6" stroke="#1D2125" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.8" r=".95" fill="#1D2125"/></svg>',
+  bad: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  none: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+};
+const statusHtml = (s) => `<span class="st ${s.cls}">${ICON[s.cls]}${esc(s.label)}</span>`;
+
+function store_get(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+function store_set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+let KEY = (location.hash.match(/k=([0-9a-f]{16,64})/i) || [])[1] || store_get(KEY_STORE) || "";
+if (KEY) store_set(KEY_STORE, KEY);
+let D = null, MONTH = "", prefs = store_get(PREF_STORE) || {}, DIST = null, loading = false, allPending = false;
+
+async function load(month) {
+  if (!KEY) { gate("Use your dashboard link", "Open the dashboard from the link you were sent. It has your access key in it."); return; }
+  if (!/^https:\/\//.test(API_URL)) { gate("Not connected", "This dashboard isn't connected to the order sheet yet."); return; }
+  loading = true; $("content").classList.add("loading");
+  try {
+    const r = await fetch(`${API_URL}?action=dash&key=${encodeURIComponent(KEY)}${month ? `&month=${month}` : ""}`, { redirect: "follow" });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || "failed");
+    D = d; MONTH = d.month.key;
+    if (DIST === null) DIST = prefs.dist != null ? prefs.dist : (d.viewer.role === "DM" && d.viewer.district ? d.viewer.district : "");
+    render();
+  } catch (e) {
+    if (!D) gate("Couldn't load the dashboard", e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : "Check your connection and reload the page.");
+  } finally {
+    loading = false; $("content").classList.remove("loading");
+  }
+}
+function gate(h, p) { $("filters").hidden = true; $("content").innerHTML = `<div class="gate card"><h2>${esc(h)}</h2><p>${esc(p)}</p></div>`; }
+
+/* ---------- per-store pacing ---------- */
+function pace(s) {
+  const spent = cents(s.spent), budget = cents(s.budget), toDate = cents(s.toDate);
+  if (!spent && !cents(s.pending)) return { cls: "none", label: "No orders yet", rank: -1 };
+  if (budget && spent > budget) return { cls: "bad", label: "Over budget", rank: 2 + spent / budget };
+  if (toDate && spent > toDate) return { cls: "warn", label: "Ahead of pace", rank: 1 + spent / Math.max(1, toDate) };
+  return { cls: "good", label: "On pace", rank: budget ? spent / budget : 0 };
+}
+
+function meterHtml(spentC, pendingC, budgetC, toDateC, label) {
+  const scale = Math.max(budgetC, spentC, 1), w = (v) => (Math.max(0, v) / scale * 100).toFixed(2) + "%";
+  const done = spentC - pendingC;
+  return `<div class="meter" role="img" aria-label="${esc(label)}">` +
+    `<i class="sp" style="width:${w(done)}"></i><i class="pd" style="width:${w(pendingC)}"></i>` +
+    (toDateC && toDateC < budgetC ? `<span class="pace" style="left:calc(${w(toDateC)} - 1px)"></span>` : "") +
+    (spentC > budgetC && budgetC ? `<span class="cap" style="left:calc(${w(budgetC)} - 1px)"></span>` : "") + `</div>`;
+}
+
+function visibleStores() {
+  let list = D.stores.filter(s => !DIST || s.district === DIST);
+  const sort = $("sort").value;
+  const byNum = (a, b) => (+a.n) - (+b.n);
+  if (sort === "store") list.sort(byNum);
+  else if (sort === "pace") list.sort((a, b) => pace(b).rank - pace(a).rank || byNum(a, b));
+  else if (sort === "used") list.sort((a, b) => (cents(b.spent) / Math.max(1, cents(b.budget))) - (cents(a.spent) / Math.max(1, cents(a.budget))) || byNum(a, b));
+  else list.sort((a, b) => ((+a.district || 99) - (+b.district || 99)) || byNum(a, b));
+  return list;
+}
+
+function render() {
+  $("filters").hidden = false;
+  const v = D.viewer;
+  $("who").innerHTML = `Signed in as <b>${esc(v.name)}</b>${v.role === "DM" && v.district ? ` · District ${esc(v.district)}` : v.role ? ` · ${esc(v.role)}` : ""}`;
+  $("modeBar").hidden = !D.testMode;
+  $("monthLabel").textContent = D.month.label;
+  const mi = D.months.indexOf(MONTH);
+  $("prevM").disabled = mi <= 0; $("nextM").disabled = mi < 0 || mi >= D.months.length - 1;
+  $("districts").innerHTML = [{ n: "", dm: "" }].concat(D.districts).map(d =>
+    `<button type="button" data-d="${esc(d.n)}" aria-pressed="${String(DIST === d.n)}">${d.n ? `District ${esc(d.n)}<small>${esc(d.dm.split(" ")[0])}</small>` : "All stores"}</button>`).join("");
+  $("updated").textContent = "Updated " + fmtClock(D.now.slice(11, 16));
+
+  const stores = visibleStores();
+  const ids = new Set(stores.map(s => s.n));
+  const sum = (f) => stores.reduce((a, s) => a + cents(f(s)), 0);
+  const budgetC = sum(s => s.budget), spentC = sum(s => s.spent), pendingC = sum(s => s.pending), toDateC = sum(s => s.toDate), invC = sum(s => s.inventory);
+  const states = stores.map(pace);
+  const ahead = states.filter(x => x.cls === "warn").length, over = states.filter(x => x.cls === "bad").length;
+  const pend = D.pending.filter(p => ids.has(p.store));
+  const pendC = pend.reduce((a, p) => a + cents(p.total), 0);
+  const invOrders = D.orders.filter(o => ids.has(o.store) && o.type === "inventory" && !/Declined/.test(o.status)).length;
+  const scope = DIST ? `District ${DIST}` : "all stores";
+
+  let h = `<div class="kpis">` +
+    `<div class="tile hero"><span class="k">Supplies ordered · ${esc(D.month.label)}</span><span class="v">${money(spentC, true)}</span>` +
+      `<span class="s">of ${money(budgetC, true)} budget for ${esc(scope)} · ${pctOf(spentC, budgetC)}% used</span>` +
+      meterHtml(spentC, pendingC, budgetC, toDateC, `${money(spentC)} ordered of ${money(budgetC)}; budget to date ${money(toDateC)}`) +
+      `<span class="legend"><span><i class="key sp"></i>Sent to Mighty</span><span><i class="key pd"></i>Waiting on approval</span><span><i class="key pace"></i>Budget to date</span></span></div>` +
+    `<div class="tile"><span class="k">Budget to date</span><span class="v">${money(toDateC, true)}</span><span class="s">Weekly budgets through the open delivery. ${spentC > toDateC ? `${money(spentC - toDateC, true)} ahead` : `${money(toDateC - spentC, true)} under`}</span></div>` +
+    `<div class="tile"><span class="k">Stores ahead of pace</span><span class="v">${ahead + over} <span style="font-size:18px;font-weight:500;color:var(--ink-soft)">of ${stores.length}</span></span><span class="s">${over ? `${over} over the month's budget` : "None over the month's budget"}</span></div>` +
+    `<div class="tile"><span class="k">Waiting on approval</span><span class="v">${pend.length}</span><span class="s">${pend.length ? `${money(pendC)} held` : "Nothing held"}</span></div>` +
+    `<div class="tile"><span class="k">Inventory parts</span><span class="v">${money(invC, true)}</span><span class="s">Not on the budget · ${invOrders} order${invOrders === 1 ? "" : "s"}</span></div>` +
+    `</div>`;
+
+  // Approvals
+  h += `<section class="card" aria-labelledby="apprH"><div class="card-h"><h2 id="apprH">Waiting on approval</h2><p>Over-budget supply orders and every inventory order</p></div>`;
+  const mine = pend.filter(p => p.review), rest = pend.filter(p => !p.review);
+  const shown = (mine.concat(rest)).slice(0, allPending ? pend.length : 6);
+  h += pend.length ? `<ul class="appr">${shown.map(p => `<li><div><div class="t"><span class="tag${p.type === "inventory" ? " inv" : ""}">${p.type === "inventory" ? "Inventory" : "Over budget"}</span>${esc(p.id)} · #${esc(p.store)}</div>` +
+      `<div class="m">${esc(p.reason || "")}${p.reason ? " · " : ""}ordered by ${esc(p.orderedBy)} · ${esc(fmtStamp(p.submitted))} · waiting on ${esc(p.approvers)}</div>` +
+      `<div class="m">${p.cutoff < D.now ? `<span class="late">Missed the ${esc(fmtShort(p.delivery))} cutoff. Approving now sends it with the next delivery.</span>` : `Approve by ${esc(fmtCut(p.cutoff))} to keep the ${esc(fmtShort(p.delivery))} delivery`}</div></div>` +
+      `<div class="amt num">${money(cents(p.total))}</div>${p.review ? `<a class="go" href="${esc(p.review)}" target="_blank" rel="noopener">Review</a>` : `<span></span>`}</li>`).join("")}</ul>` +
+      (pend.length > shown.length ? `<button type="button" class="more" id="morePending">Show all ${pend.length}</button>` : "")
+    : `<p class="empty">Nothing is waiting on approval${DIST ? " in this district" : ""}.</p>`;
+  h += `</section>`;
+
+  // Store pacing
+  h += `<section class="card" aria-labelledby="paceH"><div class="card-h"><h2 id="paceH">Store pacing · ${esc(D.month.label)}</h2>` +
+    `<p>Each week's budget is the monthly budget split over that month's deliveries. ▲ = over that week's budget · outlined = open for orders now</p></div>`;
+  h += `<div class="colh"><span>Store</span><span>Month</span><span>Weeks (by delivery)</span><span>Pace</span><span class="r">Inventory</span></div><div class="rows">`;
+  let lastD = null;
+  const sortD = $("sort").value === "district";
+  stores.forEach((s, idx) => {
+    if (sortD && s.district !== lastD) {
+      const ds = stores.filter(x => x.district === s.district);
+      const b = ds.reduce((a, x) => a + cents(x.budget), 0), sp = ds.reduce((a, x) => a + cents(x.spent), 0);
+      h += `<div class="dhead"><span>District ${esc(s.district || "–")} · ${esc(s.dm)}</span><span class="num">${money(sp, true)} of ${money(b, true)} · ${pctOf(sp, b)}%</span></div>`;
+      lastD = s.district;
+    }
+    const st = pace(s), sC = cents(s.spent), bC = cents(s.budget);
+    const cells = [];
+    for (let i = 0; i < 5; i++) {
+      const w = s.weeks[i];
+      if (!w) { cells.push(`<span class="wk none" aria-hidden="true"></span>`); continue; }
+      const wb = cents(w.budget), ws = cents(w.spent), wp = cents(w.pending);
+      const cls = w.state === "future" ? "future" : ws > wb ? "over" : w.state === "open" ? "open" : "";
+      const tip = `${fmtShort(w.date)} delivery|${w.state === "future" ? "Not open yet" : `${money(ws)} of ${money(wb)}`}${wp ? `|${money(wp)} waiting on approval` : ""}${w.state === "open" ? "|Ordering open now" : ""}`;
+      cells.push(`<span class="wk ${cls}" tabindex="0" data-tip="${esc(tip)}" aria-label="${esc(tip.replace(/\|/g, ". "))}"><span class="d">${esc(MON[+w.date.slice(5, 7) - 1] + " " + (+w.date.slice(8, 10)))}</span>` +
+        `<span class="a num">${w.state === "future" ? "—" : money(ws, true)}</span>` +
+        `<span class="bar"><i style="width:${Math.min(100, wb ? ws / wb * 100 : 0).toFixed(1)}%"></i></span></span>`);
+    }
+    h += `<div class="srow"><div><div class="sn">#${esc(s.n)}</div><div class="sc">${esc(s.city)}, ${esc(s.st)} · ${esc(s.day)}${!sortD ? ` · D${esc(s.district)}` : ""}</div></div>` +
+      `<div><div class="figs"><span><b class="num">${money(sC, true)}</b> of ${money(bC, true)}</span><span class="num">${pctOf(sC, bC)}%</span></div>` +
+      meterHtml(sC, cents(s.pending), bC, cents(s.toDate), `#${s.n}: ${money(sC)} of ${money(bC)}, budget to date ${money(cents(s.toDate))}`) + `</div>` +
+      `<div class="weeks">${cells.join("")}</div>` +
+      `<div>${statusHtml(st)}</div>` +
+      `<div class="r inv num">${money(cents(s.inventory), true)}${s.inventoryPending ? `<small>${s.inventoryPending} waiting</small>` : ""}</div></div>`;
+  });
+  h += stores.length ? `</div>` : `</div><p class="empty">No stores in this district.</p>`;
+  h += `</section>`;
+
+  // Spend by account + over-max
+  const acct = {};
+  stores.forEach(s => Object.keys(s.byAcct || {}).forEach(k => { acct[k] = (acct[k] || 0) + cents(s.byAcct[k]); }));
+  const accts = ["Operating Supplies", "Small Tools", "Office Supplies"].map(k => [k, acct[k] || 0]).sort((a, b) => b[1] - a[1]);
+  const maxA = Math.max(1, ...accts.map(a => a[1]), acct.Inventory || 0);
+  const overMax = D.overMax.filter(x => ids.has(x.store));
+  h += `<div class="two"><section class="card" aria-labelledby="acctH"><div class="card-h"><h2 id="acctH">Spend by account</h2><p>${esc(D.month.label)}, ${esc(scope)}</p></div><div class="acct">` +
+    accts.map(([k, c]) => `<div class="arow"><span>${esc(k)}</span><span class="hb" style="width:${(c / maxA * 100).toFixed(1)}%"></span><span class="num" style="text-align:right">${money(c, true)}</span></div>`).join("") +
+    `<div class="arow"><span>Inventory <small style="color:var(--ink-soft)">(not budgeted)</small></span><span class="hb inv" style="width:${((acct.Inventory || 0) / maxA * 100).toFixed(1)}%"></span><span class="num" style="text-align:right">${money(acct.Inventory || 0, true)}</span></div>` +
+    `</div></section>` +
+    `<section class="card" aria-labelledby="omH"><div class="card-h"><h2 id="omH">Ordered above the usual max</h2><p>Quantities managers kept after the warning</p></div>` +
+    (overMax.length ? `<div class="tbl"><table><thead><tr><th>Store</th><th>Item</th><th class="n">Qty</th><th class="n">Usual max</th></tr></thead><tbody>` +
+      overMax.map(x => `<tr><td>#${esc(x.store)}<br><span class="sc">${esc(x.id)}</span></td><td>${esc(x.d)}<br><span class="part">${esc(x.p)}</span></td><td class="n">${x.q}</td><td class="n">${x.mx}</td></tr>`).join("") + `</tbody></table></div>`
+      : `<p class="empty">No orders above the usual max this month.</p>`) + `</section></div>`;
+
+  // Top items (recomputed for the district from orders isn't possible without lines, so it's labeled all stores)
+  h += `<section class="card" aria-labelledby="topH"><div class="card-h"><h2 id="topH">Most-ordered items</h2><p>${esc(D.month.label)}, all stores, by dollars</p></div>` +
+    (D.top.length ? `<div class="tbl"><table><thead><tr><th>Item</th><th>Type</th><th class="n">Qty</th><th class="n">Stores</th><th class="n">Total</th></tr></thead><tbody>` +
+      D.top.slice(0, 15).map(t => `<tr><td>${esc(t.d)}<br><span class="part">${esc(t.p)}</span> <span class="sc">· ${esc(t.u)}</span></td><td>${t.type === "inventory" ? "Inventory" : "Supply"}</td><td class="n">${t.qty}</td><td class="n">${t.stores}</td><td class="n">${money(cents(t.total))}</td></tr>`).join("") + `</tbody></table></div>`
+      : `<p class="empty">No orders yet this month.</p>`) + `</section>`;
+
+  // Orders
+  const ord = D.orders.filter(o => ids.has(o.store));
+  h += `<section class="card" aria-labelledby="ordH"><div class="card-h"><h2 id="ordH">Orders · ${esc(D.month.label)}</h2><p>${ord.length} order${ord.length === 1 ? "" : "s"} for deliveries this month, newest first</p></div>` +
+    (ord.length ? `<div class="tbl"><table><thead><tr><th>Order</th><th>Store</th><th>Type</th><th>Status</th><th>Delivery</th><th class="n">Total</th></tr></thead><tbody>` +
+      ord.map(o => `<tr><td>${esc(o.id)}<br><span class="sc">${esc(fmtStamp(o.submitted))}</span></td><td>#${esc(o.store)}<br><span class="sc">${esc(o.orderedBy)}</span></td>` +
+        `<td>${o.type === "inventory" ? "Inventory" : "Supply"}</td><td>${esc(o.status)}${o.decidedBy ? `<br><span class="sc">by ${esc(o.decidedBy)}</span>` : ""}</td><td>${esc(fmtShort(o.delivery))}</td><td class="n">${money(cents(o.total))}</td></tr>`).join("") +
+      `</tbody></table></div>` : `<p class="empty">No orders for this month yet.</p>`) + `</section>`;
+
+  $("content").innerHTML = h;
+}
+
+/* ---------- controls ---------- */
+$("districts").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; DIST = b.dataset.d; prefs.dist = DIST; store_set(PREF_STORE, prefs); render(); });
+$("sort").addEventListener("change", () => { prefs.sort = $("sort").value; store_set(PREF_STORE, prefs); render(); });
+if (prefs.sort) $("sort").value = prefs.sort;
+$("prevM").addEventListener("click", () => { const i = D.months.indexOf(MONTH); if (i > 0) load(D.months[i - 1]); });
+$("nextM").addEventListener("click", () => { const i = D.months.indexOf(MONTH); if (i >= 0 && i < D.months.length - 1) load(D.months[i + 1]); });
+$("refresh").addEventListener("click", () => load(MONTH));
+$("content").addEventListener("click", (e) => { if (e.target.id === "morePending") { allPending = true; render(); } });
+setInterval(() => { if (!document.hidden && !loading && D) load(MONTH); }, 5 * 60 * 1000);
+
+/* ---------- tooltip (hover + keyboard focus) ---------- */
+const tip = $("tip");
+function showTip(el, x, y) {
+  const parts = el.dataset.tip.split("|");
+  tip.textContent = "";
+  const b = document.createElement("b"); b.textContent = parts[1] || ""; tip.appendChild(b);
+  tip.appendChild(document.createTextNode(parts[0]));
+  parts.slice(2).forEach(t => { tip.appendChild(document.createElement("br")); tip.appendChild(document.createTextNode(t)); });
+  tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  tip.style.left = Math.max(8, Math.min(innerWidth - r.width - 8, x - r.width / 2)) + "px";
+  tip.style.top = Math.max(8, y - r.height - 12) + "px";
+}
+document.addEventListener("pointermove", (e) => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) showTip(el, e.clientX, el.getBoundingClientRect().top); else tip.hidden = true; });
+document.addEventListener("focusin", (e) => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) { const r = el.getBoundingClientRect(); showTip(el, r.left + r.width / 2, r.top); } });
+document.addEventListener("focusout", () => { tip.hidden = true; });
+addEventListener("scroll", () => { tip.hidden = true; }, { passive: true });
+
+load("");
+</script>
+
+</html>
