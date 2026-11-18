@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{padding-top:env(safe-area-inset-top,0px)}</style>
+<title>Order Approval</title>
+<meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Approval page for held orders (over-budget supply orders and every inventory order).
+   Opened from the approval email or the dashboard's Review button. Same brand system as the order page. */
+:root {
+  --brand: #C8102E; --brand-ink: #9E0B23; --brand-wash: #FBEFF2;
+  --ink: #1D2125; --ink-soft: #4A5058; --muted: #6B727A; --line: #D6D9DE; --mist: #EEF0F2; --paper: #FFFFFF; --bg: #F6F7F8;
+  --amber: #FFC72C; --amber-wash: #FFF4D1; --amber-ink: #7A5200; --ok: #1E7B4A; --ok-wash: #E7F4EC; --band: #C8102E; --bad: #B3261E;
+  --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand-ink: #FF8C9C; --brand-wash: #33191E; --ink: #ECEEF0; --ink-soft: #A9B0B8; --muted: #8C939B; --line: #31363C; --mist: #262A2F;
+    --paper: #1B1E22; --bg: #121417; --amber-wash: #3A2F12; --amber-ink: #FFD467; --ok: #67CB92; --ok-wash: #163222; --band: #A30D26; --bad: #FF8A80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --brand-ink: #FF8C9C; --brand-wash: #33191E; --ink: #ECEEF0; --ink-soft: #A9B0B8; --muted: #8C939B; --line: #31363C; --mist: #262A2F;
+  --paper: #1B1E22; --bg: #121417; --amber-wash: #3A2F12; --amber-ink: #FFD467; --ok: #67CB92; --ok-wash: #163222; --band: #A30D26; --bad: #FF8A80;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.45 var(--body); -webkit-font-smoothing: antialiased; }
+button, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 820px; margin: 0 auto; }
+.num { font-variant-numeric: tabular-nums; }
+
+.masthead { background: var(--band); color: #fff; }
+.masthead .wrap { padding-block: 16px 18px; }
+.brandline { margin: 0 0 4px; font: 700 14px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.masthead h1 { margin: 0; font: 800 clamp(28px, 5vw, 38px)/.95 var(--display); }
+.modebar { background: var(--ink); color: var(--paper); font-size: 14px; }
+.modebar .wrap { padding-block: 8px; }
+.modebar b { color: var(--amber); letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin-right: 6px; }
+
+main { padding-block: 18px 40px; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; }
+.card + .card { margin-top: 14px; }
+.tag { display: inline-block; font: 700 12px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; border-radius: 999px; padding: 5px 9px; background: var(--brand-wash); color: var(--brand-ink); }
+.tag.inv { background: var(--amber-wash); color: var(--amber-ink); }
+h2 { margin: 10px 0 4px; font: 800 clamp(26px, 5vw, 32px)/1.05 var(--display); }
+.sub { margin: 0; color: var(--ink-soft); }
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 16px 0 10px; }
+.fig { background: var(--mist); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.fig .k { display: block; font: 700 12px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.fig .v { display: block; font: 700 24px/1.15 var(--body); margin-top: 2px; }
+.fig .s { display: block; font-size: 13px; color: var(--ink-soft); }
+.fig.over { background: var(--amber-wash); }
+.fig.over .v, .fig.over .k { color: var(--amber-ink); }
+.note { margin: 0; color: var(--ink-soft); font-size: 15px; }
+.deadline { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--mist); }
+.deadline.late { background: var(--amber-wash); color: var(--amber-ink); font-weight: 600; }
+
+.card-h { margin: 0 0 8px; font: 800 22px/1.1 var(--display); }
+.tbl { overflow-x: auto; margin: 0 -6px; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th { text-align: left; font: 700 12px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); padding: 8px 6px; border-bottom: 2px solid var(--ink); white-space: nowrap; }
+td { padding: 9px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tfoot td { border-bottom: 0; font-weight: 700; font-size: 17px; padding-top: 12px; }
+.part { font: 700 14px/1.2 var(--display); letter-spacing: .04em; white-space: nowrap; }
+.meta { display: none; font-size: 13px; color: var(--ink-soft); }
+.flag { display: block; font-size: 12px; font-weight: 700; color: var(--amber-ink); }
+.ea { display: block; font-size: 12px; color: var(--ink-soft); }
+.notes { margin: 14px 0 0; background: var(--mist); border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; }
+@media (max-width: 600px) {
+  .hide-sm { display: none; }
+  .meta { display: block; }
+}
+
+label { display: block; font-weight: 700; margin: 0 0 6px; }
+.field + .field { margin-top: 14px; }
+select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--muted); border-radius: 10px; background: var(--paper); }
+textarea { resize: vertical; min-height: 64px; }
+.hint { font-weight: 400; color: var(--ink-soft); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.btn { border: 2px solid var(--ink); background: var(--paper); color: var(--ink); border-radius: 12px; padding: 13px 20px; font: 700 18px/1 var(--display); letter-spacing: .02em; cursor: pointer; min-height: 50px; }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn:disabled { opacity: .5; cursor: default; }
+@media (max-width: 600px) { .actions .btn { flex: 1 1 100%; } }
+#msg { min-height: 1.4em; margin: 12px 0 0; font-weight: 600; }
+#msg.err { color: var(--bad); }
+.result { border-radius: 10px; padding: 14px 16px; background: var(--ok-wash); }
+.result.no { background: var(--mist); }
+.result b.big { display: block; font: 800 24px/1.1 var(--display); margin-bottom: 4px; }
+.gate { text-align: center; padding: 30px 18px; }
+.gate h2 { margin-top: 0; }
+footer { text-align: center; color: var(--ink-soft); font-size: 13px; padding-block: 0 36px; }
+</style>
+<header class="masthead">
+  <div class="wrap gutter">
+    <p class="brandline">Jiffy Lube · Carolinas</p>
+    <h1>Order approval</h1>
+  </div>
+</header>
+<div class="modebar" id="modeBar" hidden><div class="wrap gutter"><b>Test mode</b>Approving or declining only emails the test list.</div></div>
+<main class="wrap gutter" id="content"><div class="card gate"><p>Loading the order…</p></div></main>
+<footer class="gutter">CISA Lubes · Supply orders through Mighty Auto Parts</footer>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxk75-YEs4MN7diRu8B3x49J54dM040IYrG6muyU5-vbDE-sHgJ-Ylx9nA5m7GQNAGj/exec";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = (d) => { const c = Math.round(Number(d || 0) * 100); return (c < 0 ? "-" : "") + "$" + (Math.abs(c) / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","); };
+
+// The link carries the order number and its approval code: review.html?id=JLS-1008&t=…&by=1 (a #hash works too).
+const P = new URLSearchParams(location.search);
+new URLSearchParams(location.hash.replace(/^#/, "")).forEach((v, k) => { if (!P.has(k)) P.set(k, v); });
+const ID = (P.get("id") || "").trim(), T = (P.get("t") || "").trim(), BY = P.get("by");
+let O = null, busy = false;
+
+function gate(title, text) {
+  $("content").innerHTML = `<div class="card gate"><h2>${esc(title)}</h2><p class="sub">${esc(text)}</p></div>`;
+}
+
+async function load() {
+  if (!ID || !T) return gate("Use the link in your approval email", "This page opens from the Review and approve button in the email, or the Review button on the budget dashboard.");
+  if (!/^https:\/\//.test(API_URL)) return gate("Not connected", "This page isn't connected to the order sheet yet.");
+  try {
+    const r = await fetch(`${API_URL}?action=order&id=${encodeURIComponent(ID)}&t=${encodeURIComponent(T)}`, { redirect: "follow" });
+    const d = await r.json();
+    if (!d.ok) return gate("Couldn't open this order", d.error || "Try the link again.");
+    O = d.order;
+    $("modeBar").hidden = !d.testMode;
+    render();
+  } catch (e) {
+    gate("Couldn't load the order", "Check your connection and reload the page.");
+  }
+}
+
+function figures(o) {
+  if (o.type === "inventory") {
+    const m = o.inventoryMonth || { label: "", total: 0, count: 0 };
+    return `<div class="figs"><div class="fig"><span class="k">This order</span><span class="v num">${money(o.total)}</span></div>` +
+      `<div class="fig"><span class="k">Other inventory orders</span><span class="v num">${money(m.total)}</span><span class="s">${m.count} order${m.count === 1 ? "" : "s"} in ${esc(m.label)}</span></div></div>` +
+      `<p class="note">Inventory parts don't count against the store's supply budget. Every inventory order needs approval from the DM or ${esc(o.second || "Robert")}.</p>`;
+  }
+  const w = o.week || {}, m = o.month;
+  let h = `<div class="figs"><div class="fig"><span class="k">Weekly budget</span><span class="v num">${money(w.budget)}</span><span class="s">${esc(w.label || "")}</span></div>` +
+    `<div class="fig"><span class="k">Already ordered this week</span><span class="v num">${money(w.spent)}</span></div>` +
+    `<div class="fig"><span class="k">This order</span><span class="v num">${money(o.total)}</span></div>` +
+    `<div class="fig over"><span class="k">Over by</span><span class="v num">${money(w.over)}</span><span class="s">${esc(String(o.reason || "").replace(/^-?\$[\d,.]+\s+over\s+/i, ""))}</span></div></div>`;
+  if (m && m.budget) {
+    const withIt = m.spent + o.total;
+    h += `<p class="note">${esc(m.label)}: ${money(m.spent)} of ${money(m.budget)} ordered before this order. With it: <b>${money(withIt)}</b> (${Math.round(withIt / m.budget * 100)}% of the month).</p>`;
+  }
+  return h;
+}
+
+function linesTable(o) {
+  const rows = o.lines.map(l => {
+    const over = l.mx > 0 && l.q > l.mx;
+    return `<tr><td><span class="part">${esc(l.p)}</span></td>` +
+      `<td>${esc(l.d)}<span class="meta">${esc(l.u)} · ${money(l.price)} each</span></td>` +
+      `<td class="hide-sm">${esc(l.u)}</td>` +
+      `<td class="n"><b>${l.q}</b>${l.mq > 1 ? `<span class="ea">(${l.q * l.mq} ea)</span>` : ""}${over ? `<span class="flag">usual max ${l.mx}</span>` : ""}</td>` +
+      `<td class="n hide-sm">${money(l.price)}</td><td class="n">${money(l.total)}</td></tr>`;
+  }).join("") || `<tr><td colspan="6">No catalog items. See the store's notes below.</td></tr>`;
+  return `<div class="tbl"><table><thead><tr><th>Part #</th><th>Description</th><th class="hide-sm">Unit</th><th class="n">Qty</th><th class="n hide-sm">Price</th><th class="n">Total</th></tr></thead>` +
+    `<tbody>${rows}</tbody><tfoot><tr><td colspan="3" class="hide-sm"></td><td colspan="2" class="n">Order total</td><td class="n">${money(o.total)}</td></tr></tfoot></table></div>`;
+}
+
+function decisionHtml(o) {
+  if (!o.pending) {
+    return `<div class="result no"><b class="big">Already decided</b>This order is marked <b>${esc(o.status)}</b>${o.decidedBy ? ` by ${esc(o.decidedBy)}` : ""}${o.decidedAt ? ` on ${esc(o.decidedAt)}` : ""}.` +
+      `${o.decisionNote ? `<br>Note: “${esc(o.decisionNote)}”` : ""}</div>`;
+  }
+  const sel = Math.max(0, Math.min(o.approvers.length - 1, parseInt(BY, 10) || 0));
+  const who = o.approvers.length > 1
+    ? `<div class="field"><label for="by">Approving as</label><select id="by">${o.approvers.map((a, i) => `<option value="${i}"${i === sel ? " selected" : ""}>${esc(a)}</option>`).join("")}</select></div>`
+    : `<input type="hidden" id="by" value="0">`;
+  return who +
+    `<div class="field"><label for="note">Note to the store <span class="hint">(optional, shown on the order email)</span></label><textarea id="note" rows="2" maxlength="500"></textarea></div>` +
+    `<div class="actions"><button type="button" class="btn primary" id="approve">Approve and send to Mighty</button><button type="button" class="btn" id="decline">Decline</button></div>` +
+    `<p id="msg" role="status" aria-live="polite"></p>`;
+}
+
+function render() {
+  const o = O, inv = o.type === "inventory";
+  const deadline = !o.pending ? "" : o.late
+    ? `<p class="deadline late">The cutoff for the ${esc(o.delivery)} delivery has passed. Approving now sends it with the ${esc(o.nextDelivery)} delivery.</p>`
+    : `<p class="deadline">Approve by <b>${esc(o.cutoff)}</b> to keep the <b>${esc(o.delivery)}</b> delivery. Approving later moves it to the next delivery day.</p>`;
+  $("content").innerHTML =
+    `<section class="card" aria-labelledby="oh"><span class="tag${inv ? " inv" : ""}">${inv ? "Inventory order" : "Over budget"}</span>` +
+    `<h2 id="oh">${esc(o.id)} · Jiffy Lube #${esc(o.store.n)}</h2>` +
+    `<p class="sub">${esc([o.store.street, o.store.city, o.store.st].filter(Boolean).join(", "))} · ${esc(o.store.day)} delivery</p>` +
+    `<p class="sub">Ordered by <b>${esc(o.orderedBy)}</b> on ${esc(o.submitted)}${o.approvers.length ? ` · waiting on ${esc(o.approvers.join(" or "))}` : ""}</p>` +
+    figures(o) + deadline + `</section>` +
+    `<section class="card" aria-labelledby="ih"><h3 class="card-h" id="ih">Items</h3>${linesTable(o)}` +
+    (o.notes ? `<p class="notes"><b>Store notes:</b> ${esc(o.notes)}</p>` : "") + `</section>` +
+    `<section class="card" aria-labelledby="dh" id="decide"><h3 class="card-h" id="dh">${o.pending ? "Your decision" : "Decision"}</h3>${decisionHtml(o)}</section>`;
+  if (o.pending) {
+    $("approve").onclick = () => decide("approve");
+    $("decline").onclick = () => decide("decline");
+  }
+}
+
+async function decide(d) {
+  if (busy) return;
+  busy = true;
+  const btns = document.querySelectorAll("#decide .btn");
+  btns.forEach(b => { b.disabled = true; });
+  const msg = $("msg");
+  msg.className = ""; msg.textContent = d === "approve" ? "Approving and sending to Mighty…" : "Declining…";
+  const by = $("by") ? $("by").value : "0", note = $("note") ? $("note").value.trim() : "";
+  try {
+    const r = await fetch(API_URL, {
+      method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "decide", id: ID, t: T, decision: d, note: note, by: by }),
+    });
+    const res = await r.json();
+    if (!res.ok) throw new Error(res.error || "That didn't save. Try again.");
+    let h;
+    if (res.already) {
+      h = `<div class="result no"><b class="big">Already decided</b>This order was already marked <b>${esc(res.status)}</b>${res.decidedBy ? ` by ${esc(res.decidedBy)}` : ""}. Nothing changed.</div>`;
+    } else if (d === "approve") {
+      h = `<div class="result"><b class="big">Approved</b>The order went to Mighty for the <b>${esc(res.moved || res.delivery)}</b> delivery${res.moved ? " (the cutoff had passed, so it moved to the next delivery)" : ""}. The store was copied.</div>`;
+    } else {
+      h = `<div class="result no"><b class="big">Declined</b>The store has been emailed${note ? " with your note" : ""}. Nothing was sent to Mighty.</div>`;
+    }
+    $("decide").innerHTML = `<h3 class="card-h" id="dh">Decision</h3>${h}`;
+    const dl = document.querySelector(".deadline"); if (dl) dl.remove();
+  } catch (e) {
+    busy = false;
+    btns.forEach(b => { b.disabled = false; });
+    msg.className = "err";
+    msg.textContent = e && e.message && !/fetch|network|load failed|JSON/i.test(e.message) ? e.message : "That didn't go through. Check your connection and try again.";
+  }
+}
+
+load();
+</script>
+
+</html>
