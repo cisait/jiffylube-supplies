@@ -46,7 +46,8 @@ button, select, textarea { font: inherit; color: inherit; }
 .masthead .wrap { padding-block: 16px 18px; }
 .brandline { margin: 0 0 4px; font: 700 14px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
 .masthead h1 { margin: 0; font: 800 clamp(28px, 5vw, 38px)/.95 var(--display); }
-.modebar { background: var(--ink); color: var(--paper); font-size: 14px; }
+.modebar { background: #1D2125; color: #fff; font-size: 14px; }
+.modebar b { color: #FFC72C; }
 .modebar .wrap { padding-block: 8px; }
 .modebar b { color: var(--amber); letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin-right: 6px; }
 
@@ -155,7 +156,7 @@ function figures(o) {
   let h = `<div class="figs"><div class="fig"><span class="k">Weekly budget</span><span class="v num">${money(w.budget)}</span><span class="s">${esc(w.label || "")}</span></div>` +
     `<div class="fig"><span class="k">Already ordered this week</span><span class="v num">${money(w.spent)}</span></div>` +
     `<div class="fig"><span class="k">This order</span><span class="v num">${money(o.total)}</span></div>` +
-    `<div class="fig over"><span class="k">Over by</span><span class="v num">${money(w.over)}</span><span class="s">${esc(String(o.reason || "").replace(/^-?\$[\d,.]+\s+over\s+/i, ""))}</span></div></div>`;
+    `<div class="fig over"><span class="k">Over by</span><span class="v num">${money(w.over)}</span><span class="s">${esc(String(o.reason || "").replace(/^-?\$[\d,.]+\s+(?=over\s)/i, ""))}</span></div></div>`;
   if (m && m.budget) {
     const withIt = m.spent + o.total;
     h += `<p class="note">${esc(m.label)}: ${money(m.spent)} of ${money(m.budget)} ordered before this order. With it: <b>${money(withIt)}</b> (${Math.round(withIt / m.budget * 100)}% of the month).</p>`;
