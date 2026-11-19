@@ -921,6 +921,7 @@ function budgetState(totalC) {
 function dmName() { return STORE && STORE.dm ? STORE.dm : "your DM"; }
 function dmFirst() { return STORE && STORE.dm ? STORE.dm.split(" ")[0] : "your DM"; }
 function secondName() { return (CFG && CFG.second) || "Robert Gayle"; }
+function dmIsSecond() { return !!(STORE && STORE.dm && STORE.dm === secondName()); }   /* Robert's own stores: he is the DM and the second approver */
 function approverName() { return MODE === "inventory" && (!STORE || STORE.dm !== secondName()) ? `${dmName()} or ${secondName()}` : dmName(); }
 
 function ordersList(list) {
@@ -992,8 +993,8 @@ function updateOrder() {
   $("fine").textContent = inv
     ? `${cap(dmName())} and ${secondName()} both get an email, and either one can approve it. Mighty gets the order once it's approved.`
     : b && b.over
-      ? `${cap(dmName())} gets an email to approve or decline, with ${secondName()} copied. Mighty gets the order once it's approved.`
-      : `Mighty gets the order. Your store, your DM and ${secondName()} get a copy.`;
+      ? `${cap(dmName())} gets an email to approve or decline${dmIsSecond() ? "" : `, with ${secondName()} copied`}. Mighty gets the order once it's approved.`
+      : dmIsSecond() ? `Mighty gets the order. Your store and ${secondName()} get a copy.` : `Mighty gets the order. Your store, your DM and ${secondName()} get a copy.`;
   if (inv && STORE && STORE.dm === secondName()) $("fine").textContent = `${secondName()} gets an email to approve it. Mighty gets the order once it's approved.`;
   $("barTotal").textContent = money(totalC);
   const sub = $("barSub");
@@ -1088,7 +1089,7 @@ function showDone(r, lines) {
     `<p>${inv
       ? `Inventory orders need approval from ${esc(r.approver)}. Mighty gets it as soon as one of them approves it, and your store gets a copy.`
       : pending
-        ? `This order is ${esc(r.reason || money(cents(r.overBy)) + " over budget")}. ${esc(String(r.approver).split(" or ")[0])} got an email to approve it, with ${esc(secondName())} copied. Mighty gets it as soon as it's approved.`
+        ? `This order is ${esc(r.reason || money(cents(r.overBy)) + " over budget")}. ${esc(String(r.approver).split(" or ")[0])} got an email to approve it${dmIsSecond() ? "" : `, with ${esc(secondName())} copied`}. Mighty gets it as soon as it's approved.`
         : `Mighty has the order. Your store and your DM were copied on the email.`}</p>` +
     `<dl><dt>Order #</dt><dd>${esc(r.id)}</dd><dt>Store</dt><dd>#${esc(STORE.n)}</dd>` +
     `<dt>Delivery</dt><dd>${esc(fmtLong(r.delivery))}</dd><dt>Items</dt><dd>${count}</dd><dt>Total</dt><dd>${money(cents(r.total))}</dd></dl>` +
